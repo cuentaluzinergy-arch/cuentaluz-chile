@@ -1,0 +1,58 @@
+/* =========================================================
+   CuentaLuz Chile – Estilos personalizados
+   (Tailwind CDN cubre la mayoría; aquí solo lo que no cubre)
+   ========================================================= */
+
+/* Smooth scroll global */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Transición de tab activo */
+.tab-btn {
+  transition: color 0.2s, border-color 0.2s, background-color 0.2s;
+}
+
+/* Aparato card – hover suave cuando no está seleccionado */
+.aparato-card {
+  transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s;
+}
+.aparato-card:hover {
+  box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+}
+
+/* Input de horas: quitar flechas en Chrome/Safari */
+.horas-input::-webkit-outer-spin-button,
+.horas-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.horas-input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* Animación de entrada para resultados */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+main > section,
+main > div {
+  animation: fadeInUp 0.35s ease both;
+}
+
+/* Imprimir: ocultar nav, footer adsense y newsletter */
+@media print {
+  header, footer, #newsletter-form, #adsense-footer, #adsense-mid, .tab-btn { display: none !important; }
+  body { background: white; }
+  main { padding: 0; }
+}
+
+/* Foco accesible en inputs */
+input:focus-visible,
+select:focus-visible,
+button:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}

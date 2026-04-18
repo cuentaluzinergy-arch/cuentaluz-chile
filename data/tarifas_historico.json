@@ -1,0 +1,8 @@
+[
+  {"distribuidora_id": "enel",       "periodo": "2026-04", "cargo_fijo_neto": 596.176,  "cargo_energia_kwh_neto": 131.039, "cargo_potencia_kwh_neto": 26.029, "cargo_transporte_kwh_neto": 13.415, "fuente": "Decreto N°24T/2025"},
+  {"distribuidora_id": "enel",       "periodo": "2025-10", "cargo_fijo_neto": 533.613,  "cargo_energia_kwh_neto": 123.714, "cargo_potencia_kwh_neto": 23.901, "cargo_transporte_kwh_neto": 12.208, "fuente": "Decreto N°19T/2024"},
+  {"distribuidora_id": "cge",        "periodo": "2025-03", "cargo_fijo_neto": 849.168,  "cargo_energia_kwh_neto": 120.888, "cargo_potencia_kwh_neto": 54.205, "cargo_transporte_kwh_neto": 22.508, "fuente": "Tarifario CGE marzo 2025"},
+  {"distribuidora_id": "chilquinta", "periodo": "2026-03", "cargo_fijo_neto": 1020.269, "cargo_energia_kwh_neto": 129.614, "cargo_potencia_kwh_neto": 64.016, "cargo_transporte_kwh_neto": 26.745, "fuente": "DS 5T/2024 + 3T/2025 + 15T/2025"},
+  {"distribuidora_id": "chilquinta", "periodo": "2025-07", "cargo_fijo_neto": 990.034,  "cargo_energia_kwh_neto": 127.101, "cargo_potencia_kwh_neto": 63.735, "cargo_transporte_kwh_neto": 25.891, "fuente": "Tarifario Chilquinta julio 2025"},
+  {"distribuidora_id": "frontel",    "periodo": "2026-04", "cargo_fijo_neto": 1070.502, "cargo_energia_kwh_neto": 118.961, "cargo_potencia_kwh_neto": 94.938, "cargo_transporte_kwh_neto": 36.881, "fuente": "DS 2T/2026 + DS 5T/2024"}
+]

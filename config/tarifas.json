@@ -1,0 +1,249 @@
+{
+  "_comentario": "Tarifas residenciales vigentes. Fuente: decretos tarifarios CNE + publicaciones de distribuidoras.",
+  "_metodologia": "Precio final = cargo_fijo_con_iva + servicio_publico*kwh + (transporte+energia+potencia)*kwh*1.19 + FET_recargo*kwh_en_tramo*1.19",
+  "_nota_IVA": "El 'cargo por servicio público' (FET base) está exento de IVA. El resto aplica IVA 19%.",
+  "metadata": {
+    "ultima_actualizacion": "2026-04-01",
+    "vigente_desde": "2026-04-01",
+    "vigente_hasta": "2026-09-30",
+    "semestre": "1S2026",
+    "fuente": "CNE / Distribuidoras",
+    "proxima_actualizacion": "2026-10-01"
+  },
+  "enel": {
+    "nombre": "Enel",
+    "nombre_completo": "Enel Distribución Chile S.A.",
+    "region": "Región Metropolitana y alrededores",
+    "fuente": "Decreto N°24T/2025 + VAD 5T/2024. Vigente 01-04-2026.",
+    "url_fuente": "https://www.eneldistribucion.cl/clientes/informacion-de-interes/tarifas",
+    "vigente_desde": "2026-04-01",
+    "ultima_actualizacion": "2026-04-01",
+    "datos_verificados": true,
+    "tarifas": {
+      "BT1": {
+        "nombre": "BT1 – Residencial Normal",
+        "descripcion": "Tarifa volumétrica estándar. Sin diferenciación horaria.",
+        "cargo_fijo_neto": 596.176,
+        "cargo_servicio_publico_kwh": 0.855,
+        "cargo_transporte_kwh_neto": 13.415,
+        "cargo_energia_kwh_neto": 131.039,
+        "cargo_potencia_kwh_neto": 26.029,
+        "fet_recargos": [
+          {
+            "desde_kwh": 0,
+            "hasta_kwh": 350,
+            "recargo_kwh": 0.0
+          },
+          {
+            "desde_kwh": 350,
+            "hasta_kwh": 500,
+            "recargo_kwh": 0.923
+          },
+          {
+            "desde_kwh": 500,
+            "hasta_kwh": 1000,
+            "recargo_kwh": 2.883
+          },
+          {
+            "desde_kwh": 1000,
+            "hasta_kwh": 5000,
+            "recargo_kwh": 3.229
+          },
+          {
+            "desde_kwh": 5000,
+            "hasta_kwh": 99999,
+            "recargo_kwh": 3.229
+          }
+        ]
+      },
+      "BT2": {
+        "nombre": "BT2 – Con Medidor Horario (demanda contratada)",
+        "descripcion": "Tarifa por potencia contratada en hora punta ($/kW/mes). Requiere medidor inteligente. Para usuarios que pueden reducir la demanda MÁXIMA en horas punta (18-23 h).",
+        "cargo_fijo_neto": 596.176,
+        "cargo_servicio_publico_kwh": 0.855,
+        "cargo_transporte_kwh_neto": 13.415,
+        "cargo_energia_kwh_neto": 131.039,
+        "cargo_demanda_punta_kw_mes_neto": 19232.849,
+        "tipo_cargo_potencia": "demanda",
+        "nota": "El ahorro depende de tu demanda MÁXIMA en horas punta, no del consumo horario promedio."
+      }
+    }
+  },
+  "cge": {
+    "nombre": "CGE",
+    "nombre_completo": "CGE Distribución S.A.",
+    "region": "Centro-sur y norte (excepto RM, V y X región)",
+    "fuente": "Tarifario oficial CGE marzo 2025 (PDF parseado). Valores para Concepción (STxE-2-A Aéreo), representativo zona urbana. Nota: servicio_público 0.784 corresponde a vigencia 2025; la componente FET base aumentó a 0.855 en Apr-2026.",
+    "url_fuente": "https://www.cge.cl/informacion-clientes/tarifas/",
+    "vigente_desde": null,
+    "ultima_actualizacion": "2025-03-01",
+    "datos_verificados": true,
+    "tarifas": {
+      "BT1": {
+        "nombre": "BT1 – Residencial Normal",
+        "descripcion": "Tarifa volumétrica estándar.",
+        "cargo_fijo_neto": 849.168,
+        "cargo_servicio_publico_kwh": 0.784,
+        "cargo_transporte_kwh_neto": 22.508,
+        "cargo_energia_kwh_neto": 120.888,
+        "cargo_potencia_kwh_neto": 54.205,
+        "fet_recargos": [
+          {
+            "desde_kwh": 0,
+            "hasta_kwh": 350,
+            "recargo_kwh": 0.0
+          },
+          {
+            "desde_kwh": 350,
+            "hasta_kwh": 500,
+            "recargo_kwh": 1.408
+          },
+          {
+            "desde_kwh": 500,
+            "hasta_kwh": 1000,
+            "recargo_kwh": 2.345
+          },
+          {
+            "desde_kwh": 1000,
+            "hasta_kwh": 5000,
+            "recargo_kwh": 3.001
+          },
+          {
+            "desde_kwh": 5000,
+            "hasta_kwh": 99999,
+            "recargo_kwh": 3.282
+          }
+        ]
+      },
+      "BT2": {
+        "nombre": "BT2 – Con Medidor Horario (demanda contratada)",
+        "descripcion": "Tarifa por potencia contratada en hora punta.",
+        "cargo_fijo_neto": 849.168,
+        "cargo_servicio_publico_kwh": 0.784,
+        "cargo_transporte_kwh_neto": 22.508,
+        "cargo_energia_kwh_neto": 120.888,
+        "cargo_demanda_punta_kw_mes_neto": 21441.8,
+        "tipo_cargo_potencia": "demanda",
+        "nota": "Cargo demanda extraído del tarifario CGE marzo 2025. Chillán referencia."
+      }
+    }
+  },
+  "chilquinta": {
+    "nombre": "Chilquinta",
+    "nombre_completo": "Chilquinta Distribución S.A.",
+    "region": "V Región de Valparaíso",
+    "fuente": "Tarifas de Suministro Chilquinta Distribución S.A. – PRECIO TRASPASABLE, marzo 2026 (D.S. 5T/2024, 3T/2025, 15T/2025). PDF publicado en legales.cooperativa.cl (mar-2026). Valores tarifa BT1A/TRBT2 zona urbana. cargo_transporte = STxE (31.827 c/IVA). cargo_energia = precio nudo BT1A/BT2 (154.240 c/IVA). cargo_potencia = compras (35.555) + potencia base Tramo 1 (40.624) ambos c/IVA / 1.19. BT2 demanda = compras (13.910,50) + punta distribución T1 (4.725,00) ambos c/IVA / 1.19.",
+    "url_fuente": "https://legales.cooperativa.cl/wp-content/uploads/2026/03/VERSIÓN-IMPRESA-TARIFAS-DE-SUMINISTRO-CHILQUINTA.pdf",
+    "vigente_desde": "2026-03-01",
+    "ultima_actualizacion": "2026-03-01",
+    "datos_verificados": true,
+    "tarifas": {
+      "BT1": {
+        "nombre": "BT1A – Residencial Normal",
+        "descripcion": "Tarifa volumétrica estándar (BT1A en nomenclatura CNE).",
+        "cargo_fijo_neto": 1020.269,
+        "cargo_servicio_publico_kwh": 0.855,
+        "cargo_transporte_kwh_neto": 26.745,
+        "cargo_energia_kwh_neto": 129.614,
+        "cargo_potencia_kwh_neto": 64.016,
+        "fet_recargos": [
+          {
+            "desde_kwh": 0,
+            "hasta_kwh": 350,
+            "recargo_kwh": 0.0
+          },
+          {
+            "desde_kwh": 350,
+            "hasta_kwh": 500,
+            "recargo_kwh": 0.923
+          },
+          {
+            "desde_kwh": 500,
+            "hasta_kwh": 1000,
+            "recargo_kwh": 2.883
+          },
+          {
+            "desde_kwh": 1000,
+            "hasta_kwh": 5000,
+            "recargo_kwh": 3.229
+          },
+          {
+            "desde_kwh": 5000,
+            "hasta_kwh": 99999,
+            "recargo_kwh": 3.229
+          }
+        ]
+      },
+      "BT2": {
+        "nombre": "BT2 – Con Medidor Horario (TRBT2)",
+        "descripcion": "Tarifa por demanda máxima en hora punta. cargo_demanda = compras potencia (13.910,50 c/IVA) + demanda punta distribución T1 (4.725,00 c/IVA) / 1.19.",
+        "cargo_fijo_neto": 1020.269,
+        "cargo_servicio_publico_kwh": 0.855,
+        "cargo_transporte_kwh_neto": 26.745,
+        "cargo_energia_kwh_neto": 129.614,
+        "cargo_demanda_punta_kw_mes_neto": 15668.487,
+        "tipo_cargo_potencia": "demanda",
+        "nota": "TRBT2 marzo 2026. Demanda punta = compras (13.910,500 c/IVA) + distribución punta T1 (4.725,000 c/IVA) = 18.635,500 / 1.19 = 15.668,487 NETO."
+      }
+    }
+  },
+  "frontel": {
+    "nombre": "Frontel",
+    "nombre_completo": "Frontel S.A. (Grupo SAESA)",
+    "region": "IX Región de La Araucanía y alrededores",
+    "fuente": "Tarifas de Suministro Eléctrico abril 2026 (D.S. 2T/2026 + D.S. 5T/2024). Valores para Temuco (Aéreo). cargo_transporte incluye distribución (18.868) + STxE (18.013). cargo_potencia incluye compras (23.044) + VAD distribución (71.894).",
+    "url_fuente": "https://www.frontel.cl/informacion-de-tarifas/",
+    "vigente_desde": "2026-04-01",
+    "ultima_actualizacion": "2026-04-01",
+    "datos_verificados": true,
+    "tarifas": {
+      "BT1": {
+        "nombre": "BT1 – Residencial Normal (BT1 y ECOSUR)",
+        "descripcion": "Tarifa volumétrica estándar. Aplicable a clientes con medidor convencional.",
+        "cargo_fijo_neto": 1070.502,
+        "cargo_servicio_publico_kwh": 0.855,
+        "cargo_transporte_kwh_neto": 36.881,
+        "cargo_energia_kwh_neto": 118.961,
+        "cargo_potencia_kwh_neto": 94.938,
+        "fet_recargos": [
+          {
+            "desde_kwh": 0,
+            "hasta_kwh": 350,
+            "recargo_kwh": 0.0
+          },
+          {
+            "desde_kwh": 350,
+            "hasta_kwh": 500,
+            "recargo_kwh": 0.923
+          },
+          {
+            "desde_kwh": 500,
+            "hasta_kwh": 1000,
+            "recargo_kwh": 2.883
+          },
+          {
+            "desde_kwh": 1000,
+            "hasta_kwh": 5000,
+            "recargo_kwh": 3.229
+          },
+          {
+            "desde_kwh": 5000,
+            "hasta_kwh": 99999,
+            "recargo_kwh": 3.229
+          }
+        ]
+      },
+      "BT2": {
+        "nombre": "BT2 – Con Medidor Horario (TRBT2-TRBT3)",
+        "descripcion": "Tarifa por demanda máxima en hora punta (18-23 h). cargo_transporte incluye solo STxE (distribución VAD va en cargo demanda). cargo_demanda = compras potencia (9.047,069) + distribución punta ETR1 Temuco (7.174,047).",
+        "cargo_fijo_neto": 1070.502,
+        "cargo_servicio_publico_kwh": 0.855,
+        "cargo_transporte_kwh_neto": 18.013,
+        "cargo_energia_kwh_neto": 118.961,
+        "cargo_demanda_punta_kw_mes_neto": 16221.116,
+        "tipo_cargo_potencia": "demanda",
+        "nota": "Tarifa TRBT2-TRBT3 Temuco (Aéreo) abril 2026. El ahorro depende de la demanda MÁXIMA en horas punta, no del consumo promedio."
+      }
+    }
+  }
+}

@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Allow: /comunas
+Disallow: /api/
+
+Sitemap: https://cuentaluz.up.railway.app/sitemap.xml

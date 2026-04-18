@@ -1,0 +1,98 @@
+{
+  "refrigerador": {
+    "nombre": "Refrigerador",
+    "icono": "🧊",
+    "potencia_w": 150,
+    "horas_dia_default": 24,
+    "categoria": "Electrodomésticos",
+    "precargado": true
+  },
+  "lavadora": {
+    "nombre": "Lavadora",
+    "icono": "👕",
+    "potencia_w": 500,
+    "horas_dia_default": 1,
+    "categoria": "Electrodomésticos",
+    "precargado": false
+  },
+  "secadora": {
+    "nombre": "Secadora",
+    "icono": "🌀",
+    "potencia_w": 3000,
+    "horas_dia_default": 0.5,
+    "categoria": "Electrodomésticos",
+    "precargado": false
+  },
+  "tv": {
+    "nombre": "Televisor",
+    "icono": "📺",
+    "potencia_w": 100,
+    "horas_dia_default": 4,
+    "categoria": "Entretenimiento",
+    "precargado": true
+  },
+  "computador": {
+    "nombre": "Computador / Notebook",
+    "icono": "💻",
+    "potencia_w": 80,
+    "horas_dia_default": 6,
+    "categoria": "Electrónica",
+    "precargado": false
+  },
+  "aire_acondicionado": {
+    "nombre": "Aire Acondicionado",
+    "icono": "❄️",
+    "potencia_w": 1500,
+    "horas_dia_default": 4,
+    "categoria": "Climatización",
+    "precargado": false
+  },
+  "calefactor": {
+    "nombre": "Calefactor Eléctrico",
+    "icono": "🌡️",
+    "potencia_w": 2000,
+    "horas_dia_default": 4,
+    "categoria": "Climatización",
+    "precargado": false
+  },
+  "calefon": {
+    "nombre": "Calefón Eléctrico",
+    "icono": "🚿",
+    "potencia_w": 3000,
+    "horas_dia_default": 0.5,
+    "categoria": "Climatización",
+    "precargado": false
+  },
+  "ampolletas": {
+    "nombre": "Ampolletas (×10)",
+    "icono": "💡",
+    "potencia_w": 60,
+    "horas_dia_default": 6,
+    "categoria": "Iluminación",
+    "precargado": true
+  },
+  "microondas": {
+    "nombre": "Microondas",
+    "icono": "📡",
+    "potencia_w": 1000,
+    "horas_dia_default": 0.5,
+    "categoria": "Cocina",
+    "precargado": false
+  },
+  "lavavajillas": {
+    "nombre": "Lavavajillas",
+    "icono": "🍽️",
+    "potencia_w": 1200,
+    "horas_dia_default": 1,
+    "categoria": "Cocina",
+    "precargado": false
+  },
+  "cargadores": {
+    "nombre": "Cargadores y standby",
+    "icono": "🔌",
+    "potencia_w": 25,
+    "horas_dia_default": 8,
+    "categoria": "Electrónica",
+    "precargado": true
+  }
+}

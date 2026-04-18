@@ -1,0 +1,566 @@
+{% extends "base.html" %}
+{% block title %}Tu Boleta Estimada – CuentaLuz Chile{% endblock %}
+
+{% block content %}
+
+{# ── Macro para formato CLP ── #}
+{% macro clp(v) %}${{ "{:,.0f}".format(v|int).replace(",", ".") }}{% endmacro %}
+
+<!-- ===== RESUMEN PRINCIPAL ===== -->
+<section class="mb-8">
+  <div class="rounded-2xl overflow-hidden shadow-md"
+       style="background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #3b82f6 100%);">
+    <div class="px-6 py-8 sm:px-10 sm:py-10 text-white">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+        <div>
+          <p class="text-blue-200 text-sm font-semibold mb-1 uppercase tracking-wide">Boleta estimada</p>
+          <div class="text-5xl sm:text-6xl font-extrabold mb-2">{{ clp(resultado.total) }}</div>
+          <p class="text-blue-100 text-base font-medium">CLP / mes</p>
+        </div>
+        <div class="bg-white/15 rounded-2xl px-6 py-5 backdrop-blur-sm">
+          <div class="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
+            <div>
+              <p class="text-blue-200 text-xs uppercase tracking-wide font-semibold">Distribuidora</p>
+              <p class="font-bold text-white">{{ resultado.distribuidora }}</p>
+              {% if resultado.datos_verificados and resultado.vigente_desde %}
+              <p class="text-blue-300 text-xs mt-0.5">Vigente desde {{ resultado.vigente_desde }}</p>
+              {% endif %}
+            </div>
+            <div>
+              <p class="text-blue-200 text-xs uppercase tracking-wide font-semibold">Tarifa</p>
+              <p class="font-bold text-white">{{ resultado.tarifa_tipo }}</p>
+              {% if comuna %}
+              <p class="text-blue-300 text-xs mt-0.5">{{ comuna }}</p>
+              {% endif %}
+            </div>
+            <div>
+              <p class="text-blue-200 text-xs uppercase tracking-wide font-semibold">Consumo</p>
+              <p class="font-bold text-white">{{ resultado.kwh }} kWh/mes</p>
+            </div>
+            <div>
+              <p class="text-blue-200 text-xs uppercase tracking-wide font-semibold">Subtotal s/IVA</p>
+              <p class="font-bold text-white">{{ clp(resultado.subtotal_neto) }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== DESGLOSE + GRÁFICO ===== -->
+<section class="mb-8">
+  <h2 class="text-xl font-bold text-gray-800 mb-4">📊 Desglose de tu boleta</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+    <!-- Gráfico donut -->
+    <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm flex flex-col items-center justify-center">
+      <canvas id="boltaChart" class="max-w-[260px] max-h-[260px]"></canvas>
+    </div>
+
+    <!-- Tabla de desglose -->
+    <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+
+      {% if not resultado.datos_verificados %}
+      <div class="mb-4 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs text-amber-700">
+        ⚠️ Los valores de <strong>{{ resultado.distribuidora }}</strong> son estimaciones. Verifica con tu distribuidora para valores exactos.
+      </div>
+      {% endif %}
+
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-gray-100">
+            <th class="text-left pb-2 text-gray-500 font-semibold text-xs uppercase tracking-wide">Componente</th>
+            <th class="text-right pb-2 text-gray-500 font-semibold text-xs uppercase tracking-wide">Monto c/IVA</th>
+            <th class="text-right pb-2 text-gray-500 font-semibold text-xs uppercase tracking-wide">%</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+          <tr>
+            <td class="py-3">
+              <span class="inline-block w-3 h-3 rounded-full mr-2" style="background:#3b82f6"></span>
+              <span class="font-medium text-gray-700">Cargo fijo mensual</span>
+              <div class="text-xs text-gray-400 ml-5">Costo fijo de conexión (VAD)</div>
+            </td>
+            <td class="py-3 text-right font-semibold text-gray-900">{{ clp(resultado.cargo_fijo) }}</td>
+            <td class="py-3 text-right text-gray-400 text-xs">{{ resultado.pct_fijo }}%</td>
+          </tr>
+          <tr>
+            <td class="py-3">
+              <span class="inline-block w-3 h-3 rounded-full mr-2" style="background:#f59e0b"></span>
+              <span class="font-medium text-gray-700">Energía + Potencia</span>
+              <div class="text-xs text-gray-400 ml-5">Precio nudo CNE + cargo VAD por kWh</div>
+            </td>
+            <td class="py-3 text-right font-semibold text-gray-900">{{ clp(resultado.grupo_energia) }}</td>
+            <td class="py-3 text-right text-gray-400 text-xs">{{ resultado.pct_energia }}%</td>
+          </tr>
+          <tr>
+            <td class="py-3">
+              <span class="inline-block w-3 h-3 rounded-full mr-2" style="background:#10b981"></span>
+              <span class="font-medium text-gray-700">Transmisión eléctrica</span>
+              <div class="text-xs text-gray-400 ml-5">Peaje sistema troncal + zonal</div>
+            </td>
+            <td class="py-3 text-right font-semibold text-gray-900">{{ clp(resultado.grupo_transm) }}</td>
+            <td class="py-3 text-right text-gray-400 text-xs">{{ resultado.pct_transm }}%</td>
+          </tr>
+          <tr>
+            <td class="py-3">
+              <span class="inline-block w-3 h-3 rounded-full mr-2" style="background:#8b5cf6"></span>
+              <span class="font-medium text-gray-700">Cargos regulatorios</span>
+              <div class="text-xs text-gray-400 ml-5">Servicio público (FET) + recargos tramo</div>
+            </td>
+            <td class="py-3 text-right font-semibold text-gray-900">{{ clp(resultado.grupo_regulat) }}</td>
+            <td class="py-3 text-right text-gray-400 text-xs">{{ resultado.pct_regulat }}%</td>
+          </tr>
+          <tr class="border-t-2 border-gray-200">
+            <td class="pt-3 font-bold text-gray-900 text-base">TOTAL</td>
+            <td class="pt-3 text-right font-extrabold text-electric-700 text-lg">{{ clp(resultado.total) }}</td>
+            <td class="pt-3 text-right text-gray-400 text-xs">100%</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Desglose expandible -->
+      <details class="mt-4">
+        <summary class="text-xs text-electric-600 cursor-pointer hover:underline">Ver desglose completo por línea de boleta</summary>
+        <table class="w-full text-xs mt-2 text-gray-600">
+          <tr><td class="py-1">Cargo fijo (neto + IVA)</td><td class="text-right">{{ clp(resultado.cargo_fijo) }}</td></tr>
+          <tr><td class="py-1">Cargo por energía (precio nudo)</td><td class="text-right">{{ clp(resultado.cargo_energia) }}</td></tr>
+          <tr><td class="py-1">Cargo por potencia / VAD</td><td class="text-right">{{ clp(resultado.cargo_potencia) }}</td></tr>
+          <tr><td class="py-1">Cargo por transmisión</td><td class="text-right">{{ clp(resultado.cargo_transporte) }}</td></tr>
+          <tr><td class="py-1">Cargo por servicio público (FET, sin IVA)</td><td class="text-right">{{ clp(resultado.cargo_serv_publico) }}</td></tr>
+          {% if resultado.cargo_fet_recargo > 0 %}
+          <tr><td class="py-1 text-amber-700">Recargo FET por tramo alto consumo</td><td class="text-right text-amber-700">{{ clp(resultado.cargo_fet_recargo) }}</td></tr>
+          {% endif %}
+          <tr class="border-t"><td class="py-1 font-semibold">IVA (19 % sobre monto afecto)</td><td class="text-right font-semibold">{{ clp(resultado.iva) }}</td></tr>
+        </table>
+      </details>
+
+      <p class="mt-3 text-xs text-gray-400 bg-gray-50 rounded-lg p-2">
+        💡 <strong>Energía + Potencia</strong> representa el costo de compra de electricidad que paga la distribuidora a las generadoras (fijado por la CNE cada semestre). <strong>Transmisión</strong> es el peaje por usar las líneas de alta tensión. Ambos varían con tu consumo en kWh.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ESCENARIOS DE AHORRO ===== -->
+<section class="mb-8">
+  <h2 class="text-xl font-bold text-gray-800 mb-4">💰 ¿Cuánto podrías ahorrar?</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    {% set colores = ['green', 'teal', 'emerald'] %}
+    {% for esc in escenarios %}
+    <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
+      <div class="flex items-center justify-between mb-3">
+        <span class="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full">
+          −{{ esc.reduccion }}% consumo
+        </span>
+        <span class="text-gray-400 text-xs">{{ esc.nuevo_kwh }} kWh/mes</span>
+      </div>
+      <div class="text-3xl font-extrabold text-gray-900 mb-1">{{ clp(esc.ahorro_mensual) }}</div>
+      <p class="text-sm text-gray-500">ahorro mensual</p>
+      <div class="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
+        <span class="text-xs text-gray-400">Nueva boleta</span>
+        <span class="text-sm font-bold text-gray-700">{{ clp(esc.nuevo_total) }}</span>
+      </div>
+      <div class="flex items-center justify-between mt-1">
+        <span class="text-xs text-gray-400">Ahorro anual</span>
+        <span class="text-sm font-bold text-green-600">{{ clp(esc.ahorro_anual) }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ===== PANELES SOLARES ===== -->
+<section class="mb-8">
+  <h2 class="text-xl font-bold text-gray-800 mb-4">☀️ ¿Te convienen los paneles solares?</h2>
+  <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl border border-amber-200 p-6 shadow-sm">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <div class="text-center sm:text-left">
+        <p class="text-xs text-amber-700 font-semibold uppercase tracking-wide mb-1">Cobertura estimada</p>
+        <div class="text-4xl font-extrabold text-amber-600">{{ solar.cobertura_pct }}%</div>
+        <p class="text-sm text-amber-700 mt-1">de tu consumo</p>
+      </div>
+      <div class="text-center">
+        <p class="text-xs text-amber-700 font-semibold uppercase tracking-wide mb-1">Ahorro mensual</p>
+        <div class="text-4xl font-extrabold text-amber-600">{{ clp(solar.ahorro_mensual) }}</div>
+        <p class="text-sm text-amber-700 mt-1">CLP / mes</p>
+      </div>
+      <div class="text-center sm:text-right">
+        <p class="text-xs text-amber-700 font-semibold uppercase tracking-wide mb-1">Retorno de inversión</p>
+        {% if solar.payback_anos %}
+        <div class="text-4xl font-extrabold {% if solar.conviene %}text-green-600{% else %}text-amber-600{% endif %}">
+          {{ solar.payback_anos }} años
+        </div>
+        {% else %}
+        <div class="text-2xl font-bold text-gray-400">N/D</div>
+        {% endif %}
+        <p class="text-sm text-amber-700 mt-1">payback estimado</p>
+      </div>
+    </div>
+
+    <div class="mt-5 pt-5 border-t border-amber-200 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-amber-800">
+      <div>
+        <span class="font-semibold">Sistema típico (3 kW):</span>
+        {{ clp(solar.costo_min) }} – {{ clp(solar.costo_max) }} CLP instalado
+      </div>
+      <div>
+        <span class="font-semibold">Generación estimada:</span>
+        ~{{ solar.produccion_mensual }} kWh/mes (promedio nacional)
+      </div>
+    </div>
+
+    {% if solar.conviene %}
+    <div class="mt-4 bg-green-100 text-green-800 rounded-xl px-4 py-3 text-sm font-semibold">
+      ✅ Con tu nivel de consumo, los paneles solares son una buena inversión.
+      Además del ahorro, aumentas el valor de tu propiedad y reduces tu huella de carbono.
+    </div>
+    {% else %}
+    <div class="mt-4 bg-amber-100 text-amber-800 rounded-xl px-4 py-3 text-sm">
+      ℹ️ El retorno de inversión supera los 8 años. Puede ser válido a largo plazo o si buscas independencia energética,
+      pero analiza bien tu caso antes de decidir.
+    </div>
+    {% endif %}
+
+    <!-- AFILIADOS: espacio reservado para empresas solares -->
+    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- AFILIADOS: botón/banner de empresa solar aquí          -->
+    <!-- <a href="..." class="...">Cotiza con [Empresa Solar]</a> -->
+    <!-- ════════════════════════════════════════════════════════ -->
+  </div>
+</section>
+
+<!-- ===== COMPARACIÓN ENTRE DISTRIBUIDORAS ===== -->
+{% if comparacion_distribuidoras and comparacion_distribuidoras | length > 1 %}
+<section class="mb-8">
+  <h2 class="text-xl font-bold text-gray-800 mb-1">🗺️ Tu consumo en cada distribuidora</h2>
+  <p class="text-sm text-gray-500 mb-4">¿Cuánto pagarías con {{ resultado.kwh }} kWh/mes si vivieras en otra zona?</p>
+
+  {% set colores = {
+    "enel":       "blue",
+    "cge":        "green",
+    "chilquinta": "purple",
+    "frontel":    "orange",
+  } %}
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    {% for d in comparacion_distribuidoras %}
+    {% set color = colores.get(d.distribuidora_id, "gray") %}
+    {% set es_actual = d.distribuidora_id == resultado.distribuidora_id %}
+    <div class="bg-white rounded-2xl border-2 {{ 'border-electric-500 ring-2 ring-electric-200' if es_actual else 'border-gray-200' }} p-5 shadow-sm relative">
+
+      {% if d.es_mas_barata %}
+      <span class="absolute -top-2.5 left-3 bg-green-500 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">
+        Más barata
+      </span>
+      {% elif d.es_mas_cara %}
+      <span class="absolute -top-2.5 left-3 bg-red-400 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">
+        Más cara
+      </span>
+      {% endif %}
+
+      {% if es_actual %}
+      <span class="absolute -top-2.5 right-3 bg-electric-600 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">
+        Tu zona
+      </span>
+      {% endif %}
+
+      <p class="font-bold text-gray-900 text-sm mb-0.5">{{ d.distribuidora }}</p>
+      <p class="text-xs text-gray-400 mb-3 leading-tight">{{ d.region }}</p>
+
+      <div class="text-2xl font-extrabold text-gray-900">{{ clp(d.total) }}</div>
+      <p class="text-xs text-gray-400 mt-0.5">CLP / mes</p>
+
+      {% if d.diff_vs_minimo > 0 %}
+      <p class="mt-2 text-xs font-semibold text-red-500">+{{ clp(d.diff_vs_minimo) }} vs mínimo</p>
+      {% elif d.es_mas_barata %}
+      <p class="mt-2 text-xs font-semibold text-green-600">Tarifa mínima</p>
+      {% endif %}
+
+      {% if not d.datos_verificados %}
+      <p class="mt-1 text-xs text-amber-600">⚠ datos estimados</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <p class="mt-3 text-xs text-gray-400 bg-gray-50 rounded-lg p-2">
+    * Las tarifas varían por distribuidora según el Valor Agregado de Distribución (VAD) aprobado por la CNE para cada concesión.
+    No puedes elegir tu distribuidora — esta depende de dónde está ubicada tu propiedad.
+    <a href="/comunas" class="text-electric-600 hover:underline ml-1">Ver comunas por distribuidora →</a>
+  </p>
+</section>
+{% endif %}
+
+<!-- ===== COMPARACIÓN BT1 vs BT2 ===== -->
+<section class="mb-8">
+  <h2 class="text-xl font-bold text-gray-800 mb-4">📋 BT1 vs BT2: ¿cuál te conviene?</h2>
+  <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+
+    <!-- Explicación del mecanismo real -->
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-5 text-sm text-blue-800">
+      <p class="font-semibold mb-1">ℹ️ Cómo funciona realmente la BT2 en Chile</p>
+      <p>La BT2 <strong>NO cobra por la energía consumida en distintos horarios</strong>. Cobra por tu
+      <strong>demanda máxima en hora punta</strong> (18:00–23:00 h días hábiles), medida en kW.
+      El precio es <strong>{{ clp(comparacion_tarifas.bt2_media_total|int) }}</strong> con 2 kW de demanda punta
+      vs <strong>{{ clp(comparacion_tarifas.bt1_total) }}</strong> en BT1.</p>
+    </div>
+
+    <div class="overflow-x-auto">
+    <table class="w-full text-sm min-w-[480px]">
+      <thead>
+        <tr class="border-b border-gray-200">
+          <th class="text-left pb-3 text-gray-500 font-semibold text-xs uppercase">Escenario</th>
+          <th class="text-right pb-3 text-gray-500 font-semibold text-xs uppercase">Demanda punta</th>
+          <th class="text-right pb-3 text-gray-500 font-semibold text-xs uppercase">Boleta BT2</th>
+          <th class="text-right pb-3 text-gray-500 font-semibold text-xs uppercase">Vs BT1</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-50">
+        <tr class="bg-electric-50">
+          <td class="py-3 font-semibold text-electric-700">BT1 (actual) <span class="text-xs font-normal text-gray-400">sin medición de demanda</span></td>
+          <td class="py-3 text-right text-gray-400 text-xs">no aplica</td>
+          <td class="py-3 text-right font-bold text-gray-900">{{ clp(comparacion_tarifas.bt1_total) }}</td>
+          <td class="py-3 text-right text-gray-400">–</td>
+        </tr>
+        <tr class="{% if comparacion_tarifas.conviene_bt2_baja %}bg-green-50{% endif %}">
+          <td class="py-3 font-medium text-gray-700">
+            BT2 – demanda baja
+            <div class="text-xs text-gray-400">Solo iluminación LED + TV en punta</div>
+          </td>
+          <td class="py-3 text-right text-xs text-gray-500">1,0 kW punta</td>
+          <td class="py-3 text-right font-bold text-gray-900">{{ clp(comparacion_tarifas.bt2_baja_total) }}</td>
+          <td class="py-3 text-right font-semibold {% if comparacion_tarifas.diferencia_baja > 0 %}text-green-600{% elif comparacion_tarifas.diferencia_baja < 0 %}text-red-500{% else %}text-gray-400{% endif %}">
+            {% if comparacion_tarifas.diferencia_baja > 0 %}−{{ clp(comparacion_tarifas.diferencia_baja) }}
+            {% elif comparacion_tarifas.diferencia_baja < 0 %}+{{ clp(comparacion_tarifas.diferencia_baja|abs) }}
+            {% else %}igual{% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td class="py-3 font-medium text-gray-700">
+            BT2 – demanda media
+            <div class="text-xs text-gray-400">TV + calefactor pequeño en punta</div>
+          </td>
+          <td class="py-3 text-right text-xs text-gray-500">2,0 kW punta</td>
+          <td class="py-3 text-right font-bold text-gray-900">{{ clp(comparacion_tarifas.bt2_media_total) }}</td>
+          <td class="py-3 text-right font-semibold {% if comparacion_tarifas.diferencia_media > 0 %}text-green-600{% elif comparacion_tarifas.diferencia_media < 0 %}text-red-500{% else %}text-gray-400{% endif %}">
+            {% if comparacion_tarifas.diferencia_media > 0 %}−{{ clp(comparacion_tarifas.diferencia_media) }}
+            {% elif comparacion_tarifas.diferencia_media < 0 %}+{{ clp(comparacion_tarifas.diferencia_media|abs) }}
+            {% else %}igual{% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td class="py-3 font-medium text-gray-700">
+            BT2 – demanda alta
+            <div class="text-xs text-gray-400">AA + cocina + TV simultáneos en punta</div>
+          </td>
+          <td class="py-3 text-right text-xs text-gray-500">3,5 kW punta</td>
+          <td class="py-3 text-right font-bold text-gray-900">{{ clp(comparacion_tarifas.bt2_alta_total) }}</td>
+          <td class="py-3 text-right font-semibold {% if comparacion_tarifas.diferencia_alta > 0 %}text-green-600{% elif comparacion_tarifas.diferencia_alta < 0 %}text-red-500{% else %}text-gray-400{% endif %}">
+            {% if comparacion_tarifas.diferencia_alta > 0 %}−{{ clp(comparacion_tarifas.diferencia_alta) }}
+            {% elif comparacion_tarifas.diferencia_alta < 0 %}+{{ clp(comparacion_tarifas.diferencia_alta|abs) }}
+            {% else %}igual{% endif %}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    {% if comparacion_tarifas.demanda_limite_kw %}
+    <div class="mt-4 {% if comparacion_tarifas.conviene_bt2_baja %}bg-green-50 border-green-200{% else %}bg-amber-50 border-amber-200{% endif %} border rounded-xl px-4 py-3 text-sm">
+      <strong>Punto de quiebre:</strong> La BT2 te conviene si tu demanda máxima en hora punta
+      <strong>no supera {{ comparacion_tarifas.demanda_limite_kw }} kW</strong>.
+      {% if comparacion_tarifas.conviene_bt2_baja %}
+      Con demanda baja (1 kW) ya tendrías ahorro — considera solicitar el cambio de medidor a tu distribuidora.
+      {% endif %}
+    </div>
+    {% else %}
+    <div class="mt-4 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-600">
+      Con tu nivel de consumo, la BT1 es más conveniente incluso en el mejor escenario de BT2.
+    </div>
+    {% endif %}
+
+    <p class="mt-3 text-xs text-gray-400 bg-gray-50 rounded-lg p-3">
+      <strong>¿Cómo medir tu demanda punta?</strong> Anota qué equipos tienes encendidos simultáneamente entre las 18:00 y 23:00 h.
+      Suma sus potencias en kW (ejemplo: AA 1.5 kW + TV 0.1 kW + ampolletas 0.05 kW = 1.65 kW).
+      El cambio de medidor se solicita a tu distribuidora y generalmente es gratuito.
+    </p>
+  </div>
+</section>
+
+<!-- ===== RECOMENDACIONES ===== -->
+<section class="mb-8">
+  <h2 class="text-xl font-bold text-gray-800 mb-4">✅ 3 acciones para reducir tu boleta hoy</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    {% for rec in recomendaciones %}
+    <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
+      <div class="text-3xl mb-3">{{ rec.icono }}</div>
+      <h3 class="font-bold text-gray-900 mb-2 text-sm">{{ rec.titulo }}</h3>
+      <p class="text-gray-600 text-sm leading-relaxed">{{ rec.texto }}</p>
+      {% if rec.ahorro_estimado %}
+      <div class="mt-3 inline-block bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full">
+        Ahorro: {{ rec.ahorro_estimado }}
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ===== NEWSLETTER ===== -->
+<section class="mb-8">
+  <div class="bg-gradient-to-br from-electric-700 to-electric-800 rounded-2xl p-6 sm:p-8 text-white shadow-lg">
+    <div class="max-w-lg">
+      <h2 class="text-xl font-bold mb-2">📬 ¿Quieres saber más sobre el mercado eléctrico chileno?</h2>
+      <p class="text-blue-200 text-sm mb-5">
+        Recibe análisis de tarifas, cambios regulatorios y consejos de ahorro directamente en tu correo.
+        Sin spam, solo información útil.
+      </p>
+
+      <form id="newsletter-form" class="flex flex-col sm:flex-row gap-3">
+        <input type="hidden" name="fuente" value="resultados" />
+        <input type="email" name="email" id="newsletter-email"
+               placeholder="tu@correo.cl" required
+               class="flex-1 px-4 py-3 rounded-xl text-gray-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-400" />
+        <button type="submit"
+                class="bg-white text-electric-700 hover:bg-blue-50 font-bold px-5 py-3 rounded-xl text-sm transition-colors whitespace-nowrap shadow-sm">
+          Suscribirme gratis
+        </button>
+      </form>
+
+      <div id="newsletter-mensaje" class="mt-3 text-sm font-medium hidden"></div>
+      <p class="mt-3 text-blue-300 text-xs">🔒 Tu email está seguro. Nunca compartimos tu información.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ACCIONES ===== -->
+<div class="flex flex-col sm:flex-row items-center gap-3 justify-center mb-6">
+  <a href="/"
+     class="inline-flex items-center gap-2 bg-white border border-gray-300 hover:border-electric-400 text-gray-700 hover:text-electric-600 font-semibold px-6 py-3 rounded-xl transition-colors shadow-sm text-sm">
+    ← Calcular de nuevo
+  </a>
+  <button onclick="window.print()"
+          class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-6 py-3 rounded-xl transition-colors text-sm">
+    🖨️ Imprimir resultados
+  </button>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+  const datos = {
+    labels: ['Cargo Fijo', 'Energía + Potencia', 'Transmisión', 'Cargos Regulatorios'],
+    valores: [
+      {{ resultado.grupo_fijo }},
+      {{ resultado.grupo_energia }},
+      {{ resultado.grupo_transm }},
+      {{ resultado.grupo_regulat }}
+    ],
+    colores: ['#3b82f6', '#f59e0b', '#10b981', '#8b5cf6'],
+  };
+
+  const ctx = document.getElementById('boltaChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: datos.labels,
+      datasets: [{
+        data: datos.valores,
+        backgroundColor: datos.colores,
+        borderWidth: 2,
+        borderColor: '#fff',
+        hoverOffset: 6,
+      }],
+    },
+    options: {
+      responsive: true,
+      cutout: '62%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 16,
+            font: { size: 12, family: 'Inter' },
+            usePointStyle: true,
+            pointStyleWidth: 10,
+          },
+        },
+        tooltip: {
+          callbacks: {
+            label: function (ctx) {
+              const val = ctx.parsed;
+              const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+              const pct = ((val / total) * 100).toFixed(1);
+              const fmt = '$' + val.toLocaleString('es-CL');
+              return ` ${ctx.label}: ${fmt} (${pct}%)`;
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // ── Histórico LocalStorage ──
+  (function () {
+    try {
+      const STORAGE_KEY = 'cuentaluz_historial';
+      const MAX_ITEMS   = 5;
+      const entry = {
+        fecha:          new Date().toLocaleDateString('es-CL'),
+        kwh:            {{ resultado.kwh }},
+        distribuidora:  {{ resultado.distribuidora | tojson }},
+        dist_id:        {{ resultado.distribuidora_id | tojson }},
+        total:          {{ resultado.total }},
+        tarifa:         {{ resultado.tarifa_tipo | tojson }},
+      };
+      let historial = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      // Evitar duplicados exactos (mismo kwh + dist + tarifa)
+      historial = historial.filter(h =>
+        !(h.kwh === entry.kwh && h.dist_id === entry.dist_id && h.tarifa === entry.tarifa)
+      );
+      historial.unshift(entry);
+      if (historial.length > MAX_ITEMS) historial = historial.slice(0, MAX_ITEMS);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(historial));
+    } catch (e) { /* localStorage no disponible */ }
+  })();
+
+  // ── Newsletter AJAX ──
+  const form = document.getElementById('newsletter-form');
+  const msg  = document.getElementById('newsletter-mensaje');
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const email  = document.getElementById('newsletter-email').value;
+    const fuente = form.querySelector('[name="fuente"]').value;
+    const btn    = form.querySelector('button[type="submit"]');
+
+    btn.disabled = true;
+    btn.textContent = 'Enviando…';
+
+    try {
+      const resp = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, fuente }),
+      });
+      const data = await resp.json();
+      msg.textContent = data.mensaje;
+      msg.className   = 'mt-3 text-sm font-semibold ' + (data.success ? 'text-green-300' : 'text-red-300');
+      msg.classList.remove('hidden');
+      if (data.success) form.reset();
+    } catch {
+      msg.textContent = 'Error de conexión. Por favor intenta de nuevo.';
+      msg.className   = 'mt-3 text-sm font-semibold text-red-300';
+      msg.classList.remove('hidden');
+    } finally {
+      btn.disabled    = false;
+      btn.textContent = 'Suscribirme gratis';
+    }
+  });
+})();
+</script>
+{% endblock %}
