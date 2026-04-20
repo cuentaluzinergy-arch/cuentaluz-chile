@@ -48,6 +48,19 @@
   </div>
 </section>
 
+<!-- ===== AVISO TARIFA ===== -->
+<div class="mb-6 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-800 flex flex-col sm:flex-row sm:items-start gap-2">
+  <span class="text-base leading-none mt-0.5">ℹ️</span>
+  <div>
+    <span class="font-semibold">Calculado con tarifas vigentes
+    {% if resultado.vigente_desde %}desde {{ resultado.vigente_desde }}{% endif %}.</span>
+    Boletas de períodos anteriores usan tarifas distintas y pueden diferir.
+    <span class="block mt-1 text-blue-700">
+      Las <strong>devoluciones de tarifa de generación y transmisión</strong> (créditos variables que las distribuidoras aplican mes a mes, típicamente 8–12 $/kWh) <strong>no están incluidas</strong> en este cálculo — consulta tu última boleta para el valor exacto.
+    </span>
+  </div>
+</div>
+
 <!-- ===== DESGLOSE + GRÁFICO ===== -->
 <section class="mb-8">
   <h2 class="text-xl font-bold text-gray-800 mb-4">📊 Desglose de tu boleta</h2>
