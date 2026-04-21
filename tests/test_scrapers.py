@@ -183,7 +183,7 @@ class TestCalcularBoleta:
 
     def test_enel_bt1_250kwh(self):
         r = self.calc(250, "enel", "BT1")
-        assert r["total"] == 51642, f"Esperado $51.642, obtenido ${r['total']}"
+        assert r["total"] == 58476, f"Esperado $58.476, obtenido ${r['total']}"
 
     def test_enel_bt1_350kwh_sin_recargo_fet(self):
         # Exactamente 350 kWh → sin recargo FET (tramo 0 = 0.000)

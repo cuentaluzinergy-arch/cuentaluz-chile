@@ -27,7 +27,8 @@
         "cargo_servicio_publico_kwh": 0.855,
         "cargo_transporte_kwh_neto": 13.415,
         "cargo_energia_kwh_neto": 131.039,
-        "cargo_potencia_kwh_neto": 26.029,
+        "cargo_potencia_kwh_neto": 49.0,
+        "_nota_potencia": "= 26.029 (compras potencia) + 22.971 (VAD base distribución BT_AA T6). Fuente: Decreto N°24T/2025 Anexo tarifario.",
         "fet_recargos": [
           {
             "desde_kwh": 0,
@@ -42,12 +43,12 @@
           {
             "desde_kwh": 500,
             "hasta_kwh": 1000,
-            "recargo_kwh": 2.883
+            "recargo_kwh": 2.076
           },
           {
             "desde_kwh": 1000,
             "hasta_kwh": 5000,
-            "recargo_kwh": 3.229
+            "recargo_kwh": 2.883
           },
           {
             "desde_kwh": 5000,
@@ -160,12 +161,12 @@
           {
             "desde_kwh": 500,
             "hasta_kwh": 1000,
-            "recargo_kwh": 2.883
+            "recargo_kwh": 2.076
           },
           {
             "desde_kwh": 1000,
             "hasta_kwh": 5000,
-            "recargo_kwh": 3.229
+            "recargo_kwh": 2.883
           },
           {
             "desde_kwh": 5000,
@@ -219,12 +220,12 @@
           {
             "desde_kwh": 500,
             "hasta_kwh": 1000,
-            "recargo_kwh": 2.883
+            "recargo_kwh": 2.076
           },
           {
             "desde_kwh": 1000,
             "hasta_kwh": 5000,
-            "recargo_kwh": 3.229
+            "recargo_kwh": 2.883
           },
           {
             "desde_kwh": 5000,
