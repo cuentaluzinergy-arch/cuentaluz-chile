@@ -16,33 +16,29 @@ function fmtKwh(valor) {
 // ─── Tabs ─────────────────────────────────────────────────
 
 function switchTab(modo) {
-  const panelKwh      = document.getElementById('panel-kwh');
-  const panelAparatos = document.getElementById('panel-aparatos');
-  const tabKwh        = document.getElementById('tab-kwh');
-  const tabAparatos   = document.getElementById('tab-aparatos');
-  const modoInput     = document.getElementById('modo-input');
+  const panels = { kwh: 'panel-kwh', aparatos: 'panel-aparatos', scan: 'panel-scan' };
+  const tabs   = { kwh: 'tab-kwh',   aparatos: 'tab-aparatos',   scan: 'tab-scan'   };
+  const modoInput = document.getElementById('modo-input');
 
-  if (!panelKwh || !panelAparatos) return;
+  if (!document.getElementById('panel-kwh')) return;
 
-  if (modo === 'kwh') {
-    panelKwh.classList.remove('hidden');
-    panelAparatos.classList.add('hidden');
+  Object.values(panels).forEach(id => document.getElementById(id)?.classList.add('hidden'));
+  Object.values(tabs).forEach(id => {
+    const t = document.getElementById(id);
+    if (!t) return;
+    t.classList.remove('text-electric-600', 'border-electric-600', 'bg-white');
+    t.classList.add('text-gray-500', 'border-transparent');
+  });
 
-    tabKwh.classList.add('text-electric-600', 'border-electric-600', 'bg-white');
-    tabKwh.classList.remove('text-gray-500', 'border-transparent');
-    tabAparatos.classList.remove('text-electric-600', 'border-electric-600', 'bg-white');
-    tabAparatos.classList.add('text-gray-500', 'border-transparent');
-  } else {
-    panelAparatos.classList.remove('hidden');
-    panelKwh.classList.add('hidden');
-
-    tabAparatos.classList.add('text-electric-600', 'border-electric-600', 'bg-white');
-    tabAparatos.classList.remove('text-gray-500', 'border-transparent');
-    tabKwh.classList.remove('text-electric-600', 'border-electric-600', 'bg-white');
-    tabKwh.classList.add('text-gray-500', 'border-transparent');
+  document.getElementById(panels[modo])?.classList.remove('hidden');
+  const activeTab = document.getElementById(tabs[modo]);
+  if (activeTab) {
+    activeTab.classList.add('text-electric-600', 'border-electric-600', 'bg-white');
+    activeTab.classList.remove('text-gray-500', 'border-transparent');
   }
 
-  if (modoInput) modoInput.value = modo;
+  // scan es solo UI de entrada, el form siempre envía en modo kwh
+  if (modoInput && modo !== 'scan') modoInput.value = modo;
 }
 
 // ─── Aparatos: estado visual de tarjeta ───────────────────

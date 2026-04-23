@@ -5,21 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}CuentaLuz Chile – Calculadora de Boleta Eléctrica{% endblock %}</title>
 
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            electric: { 50:'#eff6ff', 100:'#dbeafe', 500:'#3b82f6', 600:'#2563eb', 700:'#1d4ed8', 800:'#1e40af' },
-            solar:    { 100:'#fef3c7', 400:'#fbbf24', 500:'#f59e0b', 600:'#d97706' },
-          },
-          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
-        }
-      }
-    }
-  </script>
+  <!-- Tailwind CSS (compilado y purgeado) -->
+  <link rel="stylesheet" href="/static/css/app.css" />
 
   <!-- Inter font -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -29,8 +16,54 @@
   <link rel="stylesheet" href="/static/css/custom.css" />
 
   <meta name="description" content="Calcula el desglose exacto de tu boleta de luz en Chile. Distribuidoras Enel, CGE, Chilquinta y Frontel. Gratis y sin registro." />
+
+  <!-- Open Graph / WhatsApp preview -->
+  {% block og_tags %}
+  <meta property="og:type"        content="website" />
+  <meta property="og:site_name"   content="CuentaLuz Chile" />
+  <meta property="og:title"       content="CuentaLuz Chile – Calcula tu boleta eléctrica" />
+  <meta property="og:description" content="Obtén el desglose exacto de tu boleta de luz en Chile. Enel, CGE, Chilquinta y Frontel. Gratis y sin registro." />
+  <meta property="og:image"       content="/static/icons/icon-512.svg" />
+  <meta property="og:url"         content="https://cuentaluz.cl/" />
+  <meta name="twitter:card"       content="summary" />
+  <meta name="twitter:title"      content="CuentaLuz Chile – Calcula tu boleta eléctrica" />
+  <meta name="twitter:description" content="Desglose exacto de tu boleta de luz. Enel, CGE, Chilquinta y Frontel. Gratis." />
+  {% endblock %}
+
+  <!-- Canonical URL -->
+  {% block canonical %}<link rel="canonical" href="https://cuentaluz.cl/" />{% endblock %}
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="CuentaLuz Chile – Consejos de ahorro" href="/tips/rss" />
+
+  <!-- JSON-LD Structured Data -->
+  {% block jsonld %}{% endblock %}
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#2563eb" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="CuentaLuz" />
+  <link rel="apple-touch-icon" href="/static/icons/icon-192.svg" />
 </head>
-<body class="bg-gray-50 min-h-screen font-sans text-gray-800 antialiased">
+<body class="bg-gray-50 min-h-screen font-sans text-gray-800 antialiased pb-16 sm:pb-0">
+
+<!-- ===== BANNER INSTALAR APP (solo móvil, se muestra al disparar beforeinstallprompt) ===== -->
+<div id="pwa-install-banner" class="hidden fixed bottom-16 sm:bottom-4 left-4 right-4 z-50
+     bg-electric-600 text-white rounded-2xl shadow-2xl p-4 flex items-center gap-3">
+  <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-xl flex-shrink-0">⚡</div>
+  <div class="flex-1 min-w-0">
+    <p class="font-semibold text-sm">Instala CuentaLuz</p>
+    <p class="text-xs text-white/80">Accede rápido desde tu celular, sin internet</p>
+  </div>
+  <button id="pwa-install-btn"
+          class="bg-white text-electric-600 text-xs font-bold px-3 py-2 rounded-xl flex-shrink-0 active:scale-95 transition-transform">
+    Instalar
+  </button>
+  <button id="pwa-dismiss-btn" class="text-white/60 hover:text-white text-lg leading-none flex-shrink-0">✕</button>
+</div>
 
   <!-- ===== HEADER ===== -->
   <header class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
@@ -41,8 +74,18 @@
         <span class="hidden sm:inline text-sm text-gray-400 font-medium">Chile</span>
       </a>
       <nav class="flex items-center gap-4 text-sm font-medium">
-        <a href="/" class="text-gray-500 hover:text-electric-600 transition-colors">Calculadora</a>
-        <a href="/comunas" class="text-gray-500 hover:text-electric-600 transition-colors">Comunas</a>
+        <a href="/" class="text-gray-500 hover:text-electric-600 transition-colors hidden sm:inline">Calculadora</a>
+        <a href="/comunas" class="text-gray-500 hover:text-electric-600 transition-colors hidden sm:inline">Comunas</a>
+        <a href="/tips" class="text-gray-500 hover:text-green-600 transition-colors">💬 Consejos</a>
+        <a href="/desafio" class="text-gray-500 hover:text-amber-600 transition-colors hidden sm:inline">🏆 Desafío</a>
+        <button id="push-bell-btn" title="Activar notificaciones de tarifas"
+                class="hidden text-gray-400 hover:text-electric-600 transition-colors p-1 rounded-lg hover:bg-electric-50"
+                aria-label="Notificaciones">
+          <svg id="push-bell-icon" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+          </svg>
+        </button>
       </nav>
     </div>
   </header>
@@ -90,13 +133,186 @@
       </div>
 
       <div class="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-gray-400">
-        <p>© {{ 2024 }} CuentaLuz Chile · Herramienta educativa gratuita</p>
-        <p>Tarifas de referencia según regulación <a href="https://www.cne.cl" target="_blank" rel="noopener" class="underline hover:text-gray-600">CNE Chile</a></p>
+        <p>© <span id="footer-year"></span> CuentaLuz Chile · Herramienta educativa gratuita</p>
+        <div class="flex items-center gap-4">
+          <a href="/privacidad" class="hover:text-gray-600 transition-colors">Privacidad</a>
+          <a href="https://www.cne.cl" target="_blank" rel="noopener" class="hover:text-gray-600 transition-colors">CNE Chile</a>
+        </div>
       </div>
     </div>
   </footer>
 
+  <!-- ===== BOTTOM NAV (solo móvil) ===== -->
+  <nav class="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 flex">
+    <a href="/" id="nav-calcular" class="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-gray-400">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M13 10V3L4 14h7v7l9-11h-7z"/>
+      </svg>
+      <span class="text-[10px] font-medium">Calcular</span>
+    </a>
+    <a href="/comunas" id="nav-comunas" class="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-gray-400">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+      </svg>
+      <span class="text-[10px] font-medium">Comunas</span>
+    </a>
+    <a href="/tips" id="nav-tips" class="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-gray-400">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/>
+      </svg>
+      <span class="text-[10px] font-medium">Consejos</span>
+    </a>
+  </nav>
+
   <script src="/static/js/main.js"></script>
   {% block scripts %}{% endblock %}
+
+  <script>
+    // ── Copyright año dinámico ───────────────────────────────
+    const fyEl = document.getElementById('footer-year');
+    if (fyEl) fyEl.textContent = new Date().getFullYear();
+
+    // ── Bottom nav: highlight activo ─────────────────────────
+    (function() {
+      const path = window.location.pathname;
+      const map = { '/': 'nav-calcular', '/comunas': 'nav-comunas', '/tips': 'nav-tips' };
+      const activeId = map[path] || (path === '/' ? 'nav-calcular' : null);
+      if (activeId) {
+        const el = document.getElementById(activeId);
+        el?.classList.replace('text-gray-400', 'text-electric-600');
+      }
+    })();
+
+    // ── Service Worker ────────────────────────────────────────
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/static/js/sw.js', { scope: '/' })
+        .catch(() => {});
+    }
+
+    // ── PWA Install prompt ────────────────────────────────────
+    let deferredPrompt = null;
+    const banner   = document.getElementById('pwa-install-banner');
+    const installBtn = document.getElementById('pwa-install-btn');
+    const dismissBtn = document.getElementById('pwa-dismiss-btn');
+
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (localStorage.getItem('pwa-dismissed') !== '1') {
+        banner?.classList.remove('hidden');
+      }
+    });
+
+    installBtn?.addEventListener('click', () => {
+      banner?.classList.add('hidden');
+      deferredPrompt?.prompt();
+      deferredPrompt?.userChoice.then(() => { deferredPrompt = null; });
+    });
+
+    dismissBtn?.addEventListener('click', () => {
+      banner?.classList.add('hidden');
+      localStorage.setItem('pwa-dismissed', '1');
+    });
+
+    // ── Web Push notifications ────────────────────────────────
+    (function () {
+      const btn = document.getElementById('push-bell-btn');
+      if (!btn || !('serviceWorker' in navigator) || !('PushManager' in window)) return;
+
+      btn.classList.remove('hidden');
+
+      const PUSH_KEY = 'cuentaluz_push';
+
+      function urlB64ToUint8(base64String) {
+        const pad = '='.repeat((4 - base64String.length % 4) % 4);
+        const b64 = (base64String + pad).replace(/-/g, '+').replace(/_/g, '/');
+        const raw = atob(b64);
+        return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+      }
+
+      async function getCurrentSub() {
+        const reg = await navigator.serviceWorker.ready;
+        return reg.pushManager.getSubscription();
+      }
+
+      async function updateIcon(isSubscribed) {
+        const icon = document.getElementById('push-bell-icon');
+        if (!icon) return;
+        if (isSubscribed) {
+          btn.title = 'Notificaciones activas — clic para desactivar';
+          btn.classList.replace('text-gray-400', 'text-electric-600');
+        } else {
+          btn.title = 'Activar notificaciones de tarifas';
+          btn.classList.replace('text-electric-600', 'text-gray-400');
+        }
+      }
+
+      // Estado inicial
+      getCurrentSub().then(sub => updateIcon(!!sub)).catch(() => {});
+
+      btn.addEventListener('click', async function () {
+        btn.disabled = true;
+        try {
+          const reg = await navigator.serviceWorker.ready;
+          const existing = await reg.pushManager.getSubscription();
+
+          if (existing) {
+            // Desuscribir
+            await existing.unsubscribe();
+            await fetch('/api/push/unsubscribe', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ endpoint: existing.endpoint }),
+            });
+            localStorage.removeItem(PUSH_KEY);
+            updateIcon(false);
+          } else {
+            // Suscribir — primero obtener clave pública
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') return;
+
+            const res = await fetch('/api/push/vapid-public-key');
+            const { publicKey } = await res.json();
+
+            const sub = await reg.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: urlB64ToUint8(publicKey),
+            });
+
+            const { endpoint, keys } = sub.toJSON();
+            await fetch('/api/push/subscribe', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ endpoint, p256dh: keys.p256dh, auth: keys.auth }),
+            });
+            localStorage.setItem(PUSH_KEY, '1');
+            updateIcon(true);
+          }
+        } catch (err) {
+          console.error('Push error:', err);
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    })();
+
+    // ── Compartir nativo ──────────────────────────────────────
+    document.getElementById('nav-share-btn')?.addEventListener('click', () => {
+      if (navigator.share) {
+        navigator.share({
+          title: 'CuentaLuz Chile',
+          text: 'Calcula el desglose exacto de tu boleta de luz en Chile',
+          url: window.location.href,
+        }).catch(() => {});
+      } else {
+        navigator.clipboard?.writeText(window.location.href)
+          .then(() => alert('Link copiado al portapapeles'));
+      }
+    });
+  </script>
 </body>
 </html>

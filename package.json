@@ -1,0 +1,12 @@
+{
+  "name": "cuentaluz-chile",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i static/css/input.css -o static/css/app.css --minify",
+    "watch:css": "tailwindcss -i static/css/input.css -o static/css/app.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}

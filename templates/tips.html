@@ -1,0 +1,574 @@
+{% extends "base.html" %}
+{% block title %}Consejos de ahorro – CuentaLuz Chile{% endblock %}
+
+{% block canonical %}<link rel="canonical" href="https://cuentaluz.cl/tips" />{% endblock %}
+
+{% block jsonld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Consejos de ahorro eléctrico – CuentaLuz Chile",
+  "url": "https://cuentaluz.cl/tips",
+  "description": "Trucos reales de hogares chilenos para reducir la cuenta de la luz. Comparte y aprende con tu comunidad.",
+  "inLanguage": "es-CL",
+  "isPartOf": { "@type": "WebSite", "name": "CuentaLuz Chile", "url": "https://cuentaluz.cl/" }
+}
+</script>
+{% endblock %}
+
+{% block og_tags %}
+<meta property="og:type"        content="website" />
+<meta property="og:site_name"   content="CuentaLuz Chile" />
+<meta property="og:title"       content="Consejos de ahorro eléctrico – CuentaLuz Chile" />
+<meta property="og:description" content="Trucos reales de hogares chilenos para bajar la cuenta de la luz. Comparte el tuyo y ayuda a tu comunidad." />
+<meta property="og:image"       content="/static/icons/icon-512.svg" />
+<meta property="og:url"         content="https://cuentaluz.cl/tips" />
+<meta name="twitter:card"       content="summary" />
+{% endblock %}
+
+{% block content %}
+
+<!-- ===== HERO ===== -->
+<section class="text-center py-6 sm:py-10">
+  <div class="inline-flex items-center gap-2 bg-green-100 text-green-700 rounded-full px-4 py-1.5 text-sm font-semibold mb-4">
+    🌿 Comunidad CuentaLuz
+  </div>
+  <h1 class="text-2xl sm:text-4xl font-extrabold text-gray-900 leading-tight mb-3">
+    Consejos reales de hogares chilenos
+  </h1>
+  <p class="text-gray-500 sm:text-lg max-w-lg mx-auto">
+    Trucos probados para bajar la cuenta de la luz. Comparte el tuyo y ayuda a tu comunidad.
+  </p>
+</section>
+
+<!-- ===== FORMULARIO ENVIAR TIP ===== -->
+<div class="max-w-2xl mx-auto mb-8">
+  <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+    <div class="bg-gradient-to-r from-green-500 to-emerald-500 px-5 py-3">
+      <h2 class="text-white font-bold text-sm">💬 Comparte tu consejo</h2>
+    </div>
+    <form id="tip-form" class="p-5 space-y-4">
+
+      <!-- Texto -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+          ¿Qué hiciste para bajar tu boleta?
+        </label>
+        <textarea id="tip-texto" name="texto" rows="3"
+                  maxlength="400" placeholder="Ej: Cambié todos los focos a LED y bajé $8.000 al mes..."
+                  class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-400 resize-none"></textarea>
+        <div class="flex justify-end mt-1">
+          <span id="tip-chars" class="text-xs text-gray-400">0 / 400</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        <!-- Categoría -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Categoría</label>
+          <div class="flex flex-wrap gap-2" id="cat-chips">
+            {% for cat_id, cat in categorias.items() %}
+            <button type="button" data-cat="{{ cat_id }}"
+                    class="cat-chip text-xs font-semibold px-3 py-1.5 rounded-full border border-gray-200 text-gray-500 hover:border-green-400 hover:text-green-600 transition-colors">
+              {{ cat.emoji }} {{ cat.label }}
+            </button>
+            {% endfor %}
+          </div>
+          <input type="hidden" id="tip-categoria" name="categoria" value="habitos" />
+        </div>
+
+        <!-- Ahorro + Comuna -->
+        <div class="space-y-3">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+              Ahorro estimado <span class="font-normal text-gray-400">(opcional)</span>
+            </label>
+            <input type="text" id="tip-ahorro" name="ahorro_estimado"
+                   maxlength="50" placeholder='Ej: "$5.000/mes" o "10%"'
+                   class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-400" />
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+              Tu comuna <span class="font-normal text-gray-400">(opcional)</span>
+            </label>
+            <input type="text" id="tip-comuna" name="comuna"
+                   maxlength="100" placeholder="Ej: Puente Alto"
+                   class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-400" />
+          </div>
+        </div>
+      </div>
+
+      <div id="tip-feedback" class="hidden text-sm font-semibold rounded-xl px-4 py-3"></div>
+
+      <button type="submit"
+              class="w-full bg-green-500 hover:bg-green-600 active:bg-green-700 text-white font-bold py-3.5 rounded-xl transition-colors shadow-md">
+        Publicar consejo
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ===== FEED DE TIPS ===== -->
+<div class="max-w-2xl mx-auto">
+
+  {% if not tips %}
+  <div class="text-center py-16 text-gray-400">
+    <div class="text-5xl mb-4">🌿</div>
+    <p class="font-semibold text-gray-600">Sé el primero en compartir un consejo</p>
+    <p class="text-sm mt-1">Tu experiencia puede ayudar a cientos de hogares chilenos.</p>
+  </div>
+  {% else %}
+  <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+    {{ total }} consejo{% if total != 1 %}s{% endif %} de la comunidad
+  </h2>
+
+  <!-- Filtros por categoría -->
+  <div class="flex flex-wrap gap-2 mb-4">
+    <button class="filter-chip text-xs font-semibold px-3 py-1.5 rounded-full border border-electric-500 text-electric-700 bg-electric-50"
+            data-filter="all">Todos</button>
+    {% for cat_id, cat in categorias.items() %}
+    <button class="filter-chip text-xs font-semibold px-3 py-1.5 rounded-full border border-gray-200 text-gray-500 hover:border-green-400 hover:text-green-600 transition-colors"
+            data-filter="{{ cat_id }}">{{ cat.emoji }} {{ cat.label }}</button>
+    {% endfor %}
+  </div>
+
+  <div class="space-y-3" id="tips-feed" data-page="{{ page }}" data-has-more="{{ 'true' if has_more else 'false' }}">
+    {% for tip in tips %}
+    {% set cat = categorias.get(tip.categoria, {"emoji": "💡", "label": tip.categoria}) %}
+    <div class="tip-card bg-white rounded-2xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow"
+         data-tip-id="{{ tip.id }}" data-categoria="{{ tip.categoria }}">
+
+      <div class="flex items-start gap-3">
+        <!-- Emoji categoría -->
+        <div class="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
+          {{ cat.emoji }}
+        </div>
+
+        <!-- Contenido -->
+        <div class="flex-1 min-w-0">
+          <p class="text-gray-800 text-sm leading-relaxed">{{ tip.texto }}</p>
+
+          <!-- Meta -->
+          <div class="flex flex-wrap items-center gap-2 mt-2.5">
+            <span class="text-xs bg-gray-100 text-gray-500 font-medium px-2.5 py-0.5 rounded-full">
+              {{ cat.label }}
+            </span>
+            {% if tip.ahorro_estimado %}
+            <span class="text-xs bg-green-100 text-green-700 font-semibold px-2.5 py-0.5 rounded-full">
+              💰 {{ tip.ahorro_estimado }}
+            </span>
+            {% endif %}
+            {% if tip.comuna %}
+            <span class="text-xs text-gray-400">📍 {{ tip.comuna }}</span>
+            {% endif %}
+            <span class="text-xs text-gray-300">{{ tip.fecha.strftime('%d/%m/%Y') if tip.fecha else '' }}</span>
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="flex-shrink-0 flex flex-col gap-1 items-center">
+          <!-- Like -->
+          <button class="like-btn flex flex-col items-center gap-0.5 p-2 rounded-xl
+                         hover:bg-red-50 active:scale-90 transition-all group"
+                  data-tip-id="{{ tip.id }}" data-likes="{{ tip.likes }}">
+            <span class="like-heart text-xl leading-none group-hover:scale-110 transition-transform">🤍</span>
+            <span class="like-count text-xs font-bold text-gray-400">{{ tip.likes }}</span>
+          </button>
+          <!-- Compartir -->
+          <button class="share-tip-btn p-1.5 rounded-lg text-gray-300 hover:text-green-500 transition-colors"
+                  data-texto="{{ tip.texto }}"
+                  data-ahorro="{{ tip.ahorro_estimado or '' }}"
+                  title="Compartir">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Botón cargar más -->
+  {% if has_more %}
+  <div id="load-more-wrap" class="text-center mt-6">
+    <button id="load-more-btn"
+            class="px-6 py-3 rounded-xl border border-gray-300 text-sm font-semibold text-gray-600
+                   hover:border-green-400 hover:text-green-600 transition-colors bg-white shadow-sm">
+      Cargar más consejos
+    </button>
+  </div>
+  {% endif %}
+  {% endif %}
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  const LIKED_KEY = 'cuentaluz_liked_tips';
+
+  function getLiked() {
+    try { return new Set(JSON.parse(localStorage.getItem(LIKED_KEY) || '[]')); }
+    catch { return new Set(); }
+  }
+  function saveLiked(set) {
+    try { localStorage.setItem(LIKED_KEY, JSON.stringify([...set])); } catch {}
+  }
+
+  // Marcar tips ya votados al cargar
+  const liked = getLiked();
+  document.querySelectorAll('.like-btn').forEach(btn => {
+    if (liked.has(Number(btn.dataset.tipId))) {
+      btn.querySelector('.like-heart').textContent = '❤️';
+      btn.disabled = true;
+    }
+  });
+
+  // Like click
+  document.querySelectorAll('.like-btn').forEach(btn => {
+    btn.addEventListener('click', async function () {
+      const id = Number(this.dataset.tipId);
+      if (liked.has(id)) return;
+
+      this.disabled = true;
+      try {
+        const res  = await fetch(`/api/tips/${id}/like`, { method: 'POST' });
+        const data = await res.json();
+        if (data.ok) {
+          this.querySelector('.like-heart').textContent = '❤️';
+          this.querySelector('.like-count').textContent = data.likes;
+          liked.add(id);
+          saveLiked(liked);
+        }
+      } catch {
+        this.disabled = false;
+      }
+    });
+  });
+
+  // ── Filtro por categoría ─────────────────────────────────
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', function () {
+      document.querySelectorAll('.filter-chip').forEach(c => {
+        c.classList.remove('border-electric-500', 'text-electric-700', 'bg-electric-50');
+        c.classList.add('border-gray-200', 'text-gray-500');
+      });
+      this.classList.add('border-electric-500', 'text-electric-700', 'bg-electric-50');
+      this.classList.remove('border-gray-200', 'text-gray-500');
+
+      const filtro = this.dataset.filter;
+      document.querySelectorAll('#tips-feed .tip-card').forEach(card => {
+        const visible = filtro === 'all' || card.dataset.categoria === filtro;
+        card.style.display = visible ? '' : 'none';
+      });
+    });
+  });
+
+  // ── Compartir tip individual ──────────────────────────────
+  document.querySelectorAll('.share-tip-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const texto  = this.dataset.texto;
+      const ahorro = this.dataset.ahorro;
+      let msg = `💡 Consejo de ahorro eléctrico: "${texto}"`;
+      if (ahorro) msg += ` Ahorro estimado: ${ahorro}.`;
+      msg += ` Más consejos en 👉 https://cuentaluz.cl/tips`;
+      if (navigator.share) {
+        navigator.share({ title: 'CuentaLuz Chile', text: msg, url: 'https://cuentaluz.cl/tips' }).catch(() => {});
+      } else {
+        window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+      }
+    });
+  });
+
+  // ── Cargar más (paginación) ───────────────────────────────
+  (function () {
+    const feed    = document.getElementById('tips-feed');
+    const wrapBtn = document.getElementById('load-more-wrap');
+    const btn     = document.getElementById('load-more-btn');
+    if (!btn || !feed) return;
+
+    const emojis = { iluminacion:'💡', refrigerador:'🧊', agua_caliente:'🚿',
+                     climatizacion:'🌡️', electronica:'🖥️', habitos:'🌿', solar:'☀️' };
+    const labels = { iluminacion:'Iluminación', refrigerador:'Refrigerador',
+                     agua_caliente:'Agua caliente', climatizacion:'Calefacción/Frío',
+                     electronica:'Electrónica', habitos:'Hábitos', solar:'Solar' };
+
+    function buildCard(t) {
+      const wrap = document.createElement('div');
+      wrap.className = 'tip-card bg-white rounded-2xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow';
+      wrap.dataset.tipId    = t.id;
+      wrap.dataset.categoria = t.categoria;
+
+      const inner = document.createElement('div');
+      inner.className = 'flex items-start gap-3';
+
+      const icon = document.createElement('div');
+      icon.className = 'w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center text-xl flex-shrink-0';
+      icon.textContent = emojis[t.categoria] || '💡';
+
+      const body = document.createElement('div');
+      body.className = 'flex-1 min-w-0';
+
+      const p = document.createElement('p');
+      p.className = 'text-gray-800 text-sm leading-relaxed';
+      p.textContent = t.texto;
+
+      const meta = document.createElement('div');
+      meta.className = 'flex flex-wrap items-center gap-2 mt-2.5';
+
+      const catBadge = document.createElement('span');
+      catBadge.className = 'text-xs bg-gray-100 text-gray-500 font-medium px-2.5 py-0.5 rounded-full';
+      catBadge.textContent = labels[t.categoria] || t.categoria;
+      meta.appendChild(catBadge);
+
+      if (t.ahorro_estimado) {
+        const a = document.createElement('span');
+        a.className = 'text-xs bg-green-100 text-green-700 font-semibold px-2.5 py-0.5 rounded-full';
+        a.textContent = '💰 ' + t.ahorro_estimado;
+        meta.appendChild(a);
+      }
+      if (t.comuna) {
+        const c = document.createElement('span');
+        c.className = 'text-xs text-gray-400';
+        c.textContent = '📍 ' + t.comuna;
+        meta.appendChild(c);
+      }
+      if (t.fecha) {
+        const f = document.createElement('span');
+        f.className = 'text-xs text-gray-300';
+        f.textContent = t.fecha;
+        meta.appendChild(f);
+      }
+
+      // Like button
+      const actions = document.createElement('div');
+      actions.className = 'flex-shrink-0 flex flex-col gap-1 items-center';
+
+      const likeBtn = document.createElement('button');
+      likeBtn.className = 'like-btn flex flex-col items-center gap-0.5 p-2 rounded-xl hover:bg-red-50 active:scale-90 transition-all group';
+      likeBtn.dataset.tipId = t.id;
+      likeBtn.dataset.likes = t.likes;
+
+      const heart = document.createElement('span');
+      heart.className = 'like-heart text-xl leading-none group-hover:scale-110 transition-transform';
+      heart.textContent = liked.has(t.id) ? '❤️' : '🤍';
+
+      const count = document.createElement('span');
+      count.className = 'like-count text-xs font-bold text-gray-400';
+      count.textContent = t.likes;
+
+      if (liked.has(t.id)) likeBtn.disabled = true;
+
+      likeBtn.addEventListener('click', async function () {
+        const id = Number(this.dataset.tipId);
+        if (liked.has(id)) return;
+        this.disabled = true;
+        try {
+          const res  = await fetch(`/api/tips/${id}/like`, { method: 'POST' });
+          const data = await res.json();
+          if (data.ok) {
+            heart.textContent = '❤️';
+            count.textContent = data.likes;
+            liked.add(id);
+            saveLiked(liked);
+          }
+        } catch { this.disabled = false; }
+      });
+
+      likeBtn.appendChild(heart);
+      likeBtn.appendChild(count);
+      actions.appendChild(likeBtn);
+
+      body.appendChild(p);
+      body.appendChild(meta);
+      inner.appendChild(icon);
+      inner.appendChild(body);
+      inner.appendChild(actions);
+      wrap.appendChild(inner);
+
+      // Aplicar filtro activo
+      const activeFilter = document.querySelector('.filter-chip.border-electric-500')?.dataset.filter;
+      if (activeFilter && activeFilter !== 'all' && t.categoria !== activeFilter) {
+        wrap.style.display = 'none';
+      }
+
+      return wrap;
+    }
+
+    let currentPage = Number(feed.dataset.page) || 1;
+    let hasMore     = feed.dataset.hasMore === 'true';
+
+    btn.addEventListener('click', async function () {
+      btn.disabled    = true;
+      btn.textContent = 'Cargando…';
+      try {
+        const res  = await fetch(`/api/tips?page=${currentPage + 1}`);
+        const data = await res.json();
+        data.tips.forEach(t => feed.appendChild(buildCard(t)));
+        currentPage = data.page;
+        hasMore     = data.has_more;
+        if (!hasMore) wrapBtn.remove();
+      } catch {
+        btn.textContent = 'Error. Intenta de nuevo.';
+      } finally {
+        if (hasMore) {
+          btn.disabled    = false;
+          btn.textContent = 'Cargar más consejos';
+        }
+      }
+    });
+
+    // Ocultar "cargar más" cuando hay filtro de categoría activo
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+      chip.addEventListener('click', function () {
+        const isAll = this.dataset.filter === 'all';
+        if (wrapBtn) wrapBtn.style.display = isAll ? '' : 'none';
+      });
+    });
+  })();
+
+  // ── Category chips ────────────────────────────────────────
+  const catInput = document.getElementById('tip-categoria');
+  document.querySelectorAll('.cat-chip').forEach(chip => {
+    chip.addEventListener('click', function () {
+      document.querySelectorAll('.cat-chip').forEach(c => {
+        c.classList.remove('border-green-500', 'text-green-700', 'bg-green-50');
+        c.classList.add('border-gray-200', 'text-gray-500');
+      });
+      this.classList.add('border-green-500', 'text-green-700', 'bg-green-50');
+      this.classList.remove('border-gray-200', 'text-gray-500');
+      catInput.value = this.dataset.cat;
+    });
+  });
+
+  // Seleccionar "Hábitos" por defecto visualmente
+  document.querySelector('.cat-chip[data-cat="habitos"]')?.click();
+
+  // ── Contador de caracteres ────────────────────────────────
+  const textarea  = document.getElementById('tip-texto');
+  const charCount = document.getElementById('tip-chars');
+  textarea?.addEventListener('input', () => {
+    const n = textarea.value.length;
+    charCount.textContent = `${n} / 400`;
+    charCount.classList.toggle('text-red-400', n > 380);
+    charCount.classList.toggle('text-gray-400', n <= 380);
+  });
+
+  // ── Submit form ───────────────────────────────────────────
+  const form     = document.getElementById('tip-form');
+  const feedback = document.getElementById('tip-feedback');
+  const feedDiv  = document.getElementById('tips-feed');
+
+  form?.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const btn = form.querySelector('button[type="submit"]');
+
+    const payload = {
+      texto:           textarea.value.trim(),
+      ahorro_estimado: document.getElementById('tip-ahorro').value.trim(),
+      categoria:       catInput.value,
+      comuna:          document.getElementById('tip-comuna').value.trim(),
+    };
+
+    btn.disabled    = true;
+    btn.textContent = 'Publicando…';
+    feedback.classList.add('hidden');
+
+    try {
+      const res  = await fetch('/api/tips', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload),
+      });
+      const data = await res.json();
+
+      if (data.ok) {
+        feedback.textContent = data.mensaje;
+        feedback.className   = 'text-sm font-semibold rounded-xl px-4 py-3 bg-green-50 text-green-700';
+        feedback.classList.remove('hidden');
+        form.reset();
+        charCount.textContent = '0 / 400';
+        document.querySelector('.cat-chip[data-cat="habitos"]')?.click();
+
+        // Insertar card al inicio del feed sin recargar
+        if (feedDiv) {
+          const cat    = catInput.value;
+          const emojis = { iluminacion:'💡', refrigerador:'🧊', agua_caliente:'🚿',
+                           climatizacion:'🌡️', electronica:'🖥️', habitos:'🌿', solar:'☀️' };
+          const labels = { iluminacion:'Iluminación', refrigerador:'Refrigerador',
+                           agua_caliente:'Agua caliente', climatizacion:'Calefacción/Frío',
+                           electronica:'Electrónica', habitos:'Hábitos', solar:'Solar' };
+
+          const el = document.createElement('div');
+          el.className = 'tip-card bg-white rounded-2xl border border-green-300 shadow-sm p-5';
+          el.dataset.categoria = cat;
+
+          // Construir con DOM (evita XSS — nunca insertar input del usuario en innerHTML)
+          const wrap = document.createElement('div');
+          wrap.className = 'flex items-start gap-3';
+
+          const icon = document.createElement('div');
+          icon.className = 'w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center text-xl flex-shrink-0';
+          icon.textContent = emojis[cat] || '💡';
+
+          const body = document.createElement('div');
+          body.className = 'flex-1';
+
+          const p = document.createElement('p');
+          p.className = 'text-gray-800 text-sm leading-relaxed';
+          p.textContent = payload.texto;           // textContent escapa automáticamente
+
+          const meta = document.createElement('div');
+          meta.className = 'flex flex-wrap items-center gap-2 mt-2.5';
+
+          const catBadge = document.createElement('span');
+          catBadge.className = 'text-xs bg-gray-100 text-gray-500 font-medium px-2.5 py-0.5 rounded-full';
+          catBadge.textContent = labels[cat] || cat;
+          meta.appendChild(catBadge);
+
+          if (payload.ahorro_estimado) {
+            const a = document.createElement('span');
+            a.className = 'text-xs bg-green-100 text-green-700 font-semibold px-2.5 py-0.5 rounded-full';
+            a.textContent = '💰 ' + payload.ahorro_estimado;
+            meta.appendChild(a);
+          }
+          if (payload.comuna) {
+            const c = document.createElement('span');
+            c.className = 'text-xs text-gray-400';
+            c.textContent = '📍 ' + payload.comuna;
+            meta.appendChild(c);
+          }
+          const nuevo = document.createElement('span');
+          nuevo.className = 'text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded-full font-medium';
+          nuevo.textContent = '✨ Nuevo';
+          meta.appendChild(nuevo);
+
+          body.appendChild(p);
+          body.appendChild(meta);
+          wrap.appendChild(icon);
+          wrap.appendChild(body);
+          el.appendChild(wrap);
+          feedDiv.prepend(el);
+        }
+      } else {
+        feedback.textContent = data.error || 'Error al publicar.';
+        feedback.className   = 'text-sm font-semibold rounded-xl px-4 py-3 bg-red-50 text-red-700';
+        feedback.classList.remove('hidden');
+      }
+    } catch {
+      feedback.textContent = 'Error de conexión. Intenta de nuevo.';
+      feedback.className   = 'text-sm font-semibold rounded-xl px-4 py-3 bg-red-50 text-red-700';
+      feedback.classList.remove('hidden');
+    } finally {
+      btn.disabled    = false;
+      btn.textContent = 'Publicar consejo';
+    }
+  });
+})();
+</script>
+{% endblock %}

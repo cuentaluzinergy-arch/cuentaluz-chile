@@ -3,6 +3,10 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
+from sqlalchemy import func
+from database import SessionLocal
+from app.models.benchmark import Benchmark
+from app.services.benchmark_service import guardar as bm_guardar, stats_comuna as bm_stats
 from app.services.calculator_service import (
     calcular_boleta,
     calcular_escenarios,
@@ -30,10 +34,21 @@ async def index(request: Request):
         tarifa_meta = _get_tarifa_meta()
     except Exception:
         tarifa_meta = None
+
+    conteo_calculos = 0
+    db = SessionLocal()
+    try:
+        conteo_calculos = db.query(func.count(Benchmark.id)).scalar() or 0
+    except Exception:
+        pass
+    finally:
+        db.close()
+
     return templates.TemplateResponse(
         request, "index.html",
         {"tarifas": tarifas, "aparatos": aparatos,
-         "comunas": comunas, "tarifa_meta": tarifa_meta},
+         "comunas": comunas, "tarifa_meta": tarifa_meta,
+         "conteo_calculos": conteo_calculos},
     )
 
 
@@ -95,6 +110,18 @@ async def calcular(request: Request):
     comparacion_distribuidoras = calcular_comparacion_distribuidoras(kwh, tarifa_tipo)
     recomendaciones = generar_recomendaciones(resultado, distribuidora)
 
+    # Benchmark comunal: guardar consumo anónimo y obtener stats
+    benchmark = None
+    if nombre_comuna:
+        db = SessionLocal()
+        try:
+            bm_guardar(db, nombre_comuna, distribuidora, int(kwh))
+            benchmark = bm_stats(db, nombre_comuna, int(kwh))
+        except Exception:
+            pass
+        finally:
+            db.close()
+
     return templates.TemplateResponse(
         request, "resultados.html",
         {
@@ -105,6 +132,7 @@ async def calcular(request: Request):
             "comparacion_distribuidoras": comparacion_distribuidoras,
             "recomendaciones":           recomendaciones,
             "comuna":                    nombre_comuna or None,
+            "benchmark":                 benchmark,
         },
     )
 

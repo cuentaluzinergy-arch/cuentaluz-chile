@@ -1,0 +1,46 @@
+{
+  "name": "CuentaLuz Chile",
+  "short_name": "CuentaLuz",
+  "description": "Calcula el desglose exacto de tu boleta eléctrica en Chile. Enel, CGE, Chilquinta y Frontel.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "lang": "es-CL",
+  "categories": ["utilities", "finance", "lifestyle"],
+  "icons": [
+    {
+      "src": "/static/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Calcular boleta",
+      "short_name": "Calcular",
+      "description": "Ir a la calculadora principal",
+      "url": "/",
+      "icons": [{ "src": "/static/icons/icon-192.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Ver comunas",
+      "short_name": "Comunas",
+      "description": "Consultar distribuidora por comuna",
+      "url": "/comunas",
+      "icons": [{ "src": "/static/icons/icon-192.svg", "sizes": "192x192" }]
+    }
+  ],
+  "screenshots": [],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

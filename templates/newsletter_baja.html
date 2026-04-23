@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ titulo }} – CuentaLuz Chile{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto text-center py-20">
+  <div class="text-6xl mb-6">{{ icono }}</div>
+  <h1 class="text-2xl font-extrabold text-gray-900 mb-3">{{ titulo }}</h1>
+  <p class="text-gray-500 mb-8">{{ mensaje }}</p>
+  <a href="/"
+     class="inline-flex items-center gap-2 bg-electric-600 hover:bg-electric-700 text-white font-bold px-8 py-3 rounded-xl transition-colors shadow-md text-sm">
+    ← Volver a la calculadora
+  </a>
+</div>
+{% endblock %}

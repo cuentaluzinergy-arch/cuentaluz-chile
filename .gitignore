@@ -46,3 +46,10 @@ htmlcov/
 # OS
 .DS_Store
 Thumbs.db
+
+# Node (Tailwind build)
+node_modules/
+# static/css/app.css se commitea (generado por npm run build:css)
+
+# Claves VAPID (contienen clave privada EC — nunca a git)
+data/vapid_keys.json

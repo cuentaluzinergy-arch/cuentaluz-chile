@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Política de Privacidad – CuentaLuz Chile{% endblock %}
+
+{% block canonical %}<link rel="canonical" href="https://cuentaluz.cl/privacidad" />{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-6">
+
+  <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2">Política de Privacidad</h1>
+  <p class="text-sm text-gray-400 mb-8">Última actualización: abril 2026</p>
+
+  <div class="prose prose-sm max-w-none space-y-8 text-gray-700">
+
+    <section>
+      <h2 class="text-lg font-bold text-gray-900 mb-3">1. Quiénes somos</h2>
+      <p>CuentaLuz Chile es una herramienta educativa gratuita para calcular y entender las boletas de electricidad residencial en Chile. No somos una empresa distribuidora ni tenemos afiliación con Enel, CGE, Chilquinta o Frontel.</p>
+    </section>
+
+    <section>
+      <h2 class="text-lg font-bold text-gray-900 mb-3">2. Datos que recopilamos</h2>
+      <div class="space-y-4">
+
+        <div class="bg-gray-50 rounded-xl p-4">
+          <h3 class="font-semibold text-gray-800 mb-1">📧 Correo electrónico (newsletter)</h3>
+          <p>Solo si te suscribes voluntariamente al newsletter. Usamos este dato exclusivamente para enviar actualizaciones sobre tarifas eléctricas. <strong>No lo compartimos con terceros.</strong> Puedes darte de baja en cualquier momento desde el enlace al pie de cada correo.</p>
+        </div>
+
+        <div class="bg-gray-50 rounded-xl p-4">
+          <h3 class="font-semibold text-gray-800 mb-1">⚡ Consumo eléctrico (benchmark)</h3>
+          <p>Cuando calculas tu boleta e ingresas tu comuna, guardamos el consumo en kWh de forma <strong>completamente anónima</strong> para mostrar estadísticas comparativas por zona. No se registra ningún dato que permita identificarte.</p>
+        </div>
+
+        <div class="bg-gray-50 rounded-xl p-4">
+          <h3 class="font-semibold text-gray-800 mb-1">💬 Consejos y desafíos</h3>
+          <p>Los consejos y participaciones en el desafío mensual son voluntarios y anónimos. Si incluyes un apodo o nombre de comuna, esos datos quedan almacenados asociados a tu contribución y son públicos en el sitio.</p>
+        </div>
+
+        <div class="bg-gray-50 rounded-xl p-4">
+          <h3 class="font-semibold text-gray-800 mb-1">🍪 Cookies y almacenamiento local</h3>
+          <p>CuentaLuz <strong>no usa cookies propias</strong>. Utilizamos <code>localStorage</code> del navegador para guardar tu historial de cálculos y los tips que has marcado con "me gusta". Estos datos nunca se envían a nuestros servidores.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-lg font-bold text-gray-900 mb-3">3. Google AdSense</h2>
+      <p>Cuando Google AdSense esté activo en el sitio, Google podrá mostrar anuncios personalizados y recopilar datos de navegación según su propia política de privacidad. Google usa cookies para personalizar publicidad. Puedes consultar la política de privacidad de Google en <a href="https://policies.google.com/privacy" target="_blank" rel="noopener" class="text-electric-600 underline">policies.google.com/privacy</a> y administrar tus preferencias en <a href="https://adssettings.google.com" target="_blank" rel="noopener" class="text-electric-600 underline">adssettings.google.com</a>.</p>
+    </section>
+
+    <section>
+      <h2 class="text-lg font-bold text-gray-900 mb-3">4. Tus derechos</h2>
+      <p>De acuerdo con la Ley N° 19.628 sobre Protección de la Vida Privada de Chile, tienes derecho a:</p>
+      <ul class="list-disc ml-5 mt-2 space-y-1">
+        <li>Acceder a los datos personales que tenemos sobre ti.</li>
+        <li>Solicitar la rectificación de datos incorrectos.</li>
+        <li>Solicitar la eliminación de tus datos (derecho al olvido).</li>
+        <li>Darte de baja del newsletter en cualquier momento.</li>
+      </ul>
+      <p class="mt-3">Para ejercer estos derechos, escríbenos a <a href="mailto:contacto@cuentaluz.cl" class="text-electric-600 underline">contacto@cuentaluz.cl</a>.</p>
+    </section>
+
+    <section>
+      <h2 class="text-lg font-bold text-gray-900 mb-3">5. Seguridad</h2>
+      <p>Los datos anónimos (benchmark, tips, desafíos) no contienen información personal. Los correos del newsletter se almacenan en una base de datos con acceso restringido. No vendemos, arrendamos ni cedemos tu información a terceros bajo ninguna circunstancia.</p>
+    </section>
+
+    <section>
+      <h2 class="text-lg font-bold text-gray-900 mb-3">6. Cambios a esta política</h2>
+      <p>Podemos actualizar esta política cuando sea necesario. La fecha de última actualización siempre estará indicada al inicio de esta página. Te notificaremos por newsletter si los cambios son significativos.</p>
+    </section>
+
+    <div class="bg-electric-50 border border-electric-100 rounded-xl p-4 text-sm text-electric-800">
+      <p><strong>¿Tienes preguntas?</strong> Escríbenos a <a href="mailto:contacto@cuentaluz.cl" class="underline">contacto@cuentaluz.cl</a>. Respondemos en menos de 48 horas.</p>
+    </div>
+
+  </div>
+
+  <div class="mt-8 text-center">
+    <a href="/" class="text-sm text-gray-400 hover:text-electric-600 transition-colors">← Volver a la calculadora</a>
+  </div>
+</div>
+{% endblock %}

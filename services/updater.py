@@ -252,8 +252,8 @@ def run_update(dists: list[str] | None = None, dry_run: bool = False, force: boo
         _guardar_tarifas(tarifas_data)
         logger.info(f"tarifas.json actualizado. Distribuidoras: {', '.join(dists_actualizadas)}")
 
-        # Notificacion email
         if cambios_totales:
+            # 1. Alerta interna al administrador
             cuerpo = (
                 f"Actualizacion de tarifas — {date.today()}\n"
                 f"Distribuidoras actualizadas: {', '.join(dists_actualizadas)}\n"
@@ -263,6 +263,35 @@ def run_update(dists: list[str] | None = None, dry_run: bool = False, force: boo
                 f"Tarifas actualizadas — {', '.join(dists_actualizadas)}",
                 cuerpo
             )
+
+            # 2. Notificar a suscriptores email
+            try:
+                from database import SessionLocal
+                from app.models.subscriber import Subscriber
+                from services.email_service import send_tariff_update
+                db = SessionLocal()
+                try:
+                    emails = [
+                        r.email for r in
+                        db.query(Subscriber.email)
+                        .filter(Subscriber.activo == True)  # noqa: E712
+                        .all()
+                    ]
+                finally:
+                    db.close()
+                if emails:
+                    send_tariff_update(emails, dists_actualizadas, cambios_totales)
+                    logger.info(f"Email enviado a {len(emails)} suscriptores")
+            except Exception as e:
+                logger.error(f"Error notificando suscriptores email: {e}")
+
+            # 3. Notificar via Web Push
+            try:
+                from services.push_service import notify_tariff_update as push_notify
+                enviados = push_notify(dists_actualizadas)
+                logger.info(f"Push enviado a {enviados} dispositivos")
+            except Exception as e:
+                logger.error(f"Error notificando push: {e}")
     elif not dists_actualizadas:
         logger.info("Sin cambios detectados. tarifas.json no modificado.")
 

@@ -1,6 +1,11 @@
 User-agent: *
 Allow: /
 Allow: /comunas
+Allow: /tips
+Allow: /desafio
+Allow: /privacidad
 Disallow: /api/
+Disallow: /offline
+Disallow: /newsletter/
 
-Sitemap: https://cuentaluz.up.railway.app/sitemap.xml
+Sitemap: https://cuentaluz.cl/sitemap.xml

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Sin conexión – CuentaLuz Chile{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto text-center py-20">
+  <div class="text-7xl mb-6">⚡</div>
+  <h1 class="text-2xl font-extrabold text-gray-900 mb-3">Sin conexión a internet</h1>
+  <p class="text-gray-500 text-base mb-8 leading-relaxed">
+    No se puede conectar al servidor. Verifica tu conexión e inténtalo de nuevo.<br>
+    Si instalaste CuentaLuz como app, algunas páginas están disponibles offline.
+  </p>
+  <div class="flex flex-col sm:flex-row gap-3 justify-center">
+    <button onclick="window.location.reload()"
+            class="px-6 py-3 bg-electric-600 hover:bg-electric-700 text-white font-bold rounded-xl transition-colors shadow-md text-sm">
+      Reintentar
+    </button>
+    <button onclick="history.back()"
+            class="px-6 py-3 border border-gray-300 text-gray-700 hover:border-electric-400 font-semibold rounded-xl transition-colors text-sm">
+      Volver atrás
+    </button>
+  </div>
+</div>
+{% endblock %}
