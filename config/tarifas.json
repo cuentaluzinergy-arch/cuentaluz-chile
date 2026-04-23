@@ -7,7 +7,7 @@
     "vigente_desde": "2026-04-01",
     "vigente_hasta": "2026-09-30",
     "semestre": "1S2026",
-    "fuente": "CNE / Distribuidoras. Enel ✅ abr-2026. Frontel ✅ abr-2026. Chilquinta ✅ abr-2026 (verif. PDF mar-2026). CGE ⚠️ mar-2025 pendiente actualización.",
+    "fuente": "CNE / Distribuidoras. Enel ✅ abr-2026. Frontel ✅ abr-2026. Chilquinta ✅ abr-2026. CGE ✅ servicio_público actualizado 0.855; cargo_fijo/energía/transporte/potencia verificados mar-2025 (Decreto 5T/2024, estables). Pendiente PDF CGE abr-2026 para confirmar cargo_fijo c/IPC.",
     "proxima_actualizacion": "2026-10-01"
   },
   "enel": {
@@ -74,17 +74,17 @@
     "nombre": "CGE",
     "nombre_completo": "CGE Distribución S.A.",
     "region": "Centro-sur y norte (excepto RM, V y X región)",
-    "fuente": "Tarifario oficial CGE marzo 2025 (PDF parseado). Valores para Concepción (STxE-2-A Aéreo), representativo zona urbana. Nota: servicio_público 0.784 corresponde a vigencia 2025; la componente FET base aumentó a 0.855 en Apr-2026.",
+    "fuente": "Tarifario oficial CGE marzo 2025 (PDF parseado + verificado pdfplumber). Valores para Concepción (STxE-2-A Aéreo), representativo zona urbana. cargo_servicio_público actualizado a 0.855 para 1S2026 (cambio regulatorio Ley 20.928, igual para todas las distribuidoras). Resto de componentes (fijo, energía, transporte, potencia) son Decreto 5T/2024: estables entre ene-mar 2025, probablemente vigentes en 2026. PENDIENTE: bajar PDF CGE abr-2026 desde cge.cl para verificar cargo_fijo actualizado por IPC.",
     "url_fuente": "https://www.cge.cl/informacion-clientes/tarifas/",
-    "vigente_desde": null,
-    "ultima_actualizacion": "2025-03-01",
+    "vigente_desde": "2026-04-01",
+    "ultima_actualizacion": "2026-04-23",
     "datos_verificados": true,
     "tarifas": {
       "BT1": {
         "nombre": "BT1 – Residencial Normal",
         "descripcion": "Tarifa volumétrica estándar.",
         "cargo_fijo_neto": 849.168,
-        "cargo_servicio_publico_kwh": 0.784,
+        "cargo_servicio_publico_kwh": 0.855,
         "cargo_transporte_kwh_neto": 22.508,
         "cargo_energia_kwh_neto": 120.888,
         "cargo_potencia_kwh_neto": 54.205,
@@ -97,7 +97,7 @@
           {
             "desde_kwh": 350,
             "hasta_kwh": 500,
-            "recargo_kwh": 1.408
+            "recargo_kwh": 1.409
           },
           {
             "desde_kwh": 500,
@@ -112,7 +112,7 @@
           {
             "desde_kwh": 5000,
             "hasta_kwh": 99999,
-            "recargo_kwh": 3.282
+            "recargo_kwh": 3.281
           }
         ]
       },
@@ -120,7 +120,7 @@
         "nombre": "BT2 – Con Medidor Horario (demanda contratada)",
         "descripcion": "Tarifa por potencia contratada en hora punta.",
         "cargo_fijo_neto": 849.168,
-        "cargo_servicio_publico_kwh": 0.784,
+        "cargo_servicio_publico_kwh": 0.855,
         "cargo_transporte_kwh_neto": 22.508,
         "cargo_energia_kwh_neto": 120.888,
         "cargo_demanda_punta_kw_mes_neto": 21441.8,
