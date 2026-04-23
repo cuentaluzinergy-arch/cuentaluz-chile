@@ -152,3 +152,138 @@ class TestGisEndpoint:
     def test_falta_parametro_422(self, client):
         resp = client.get("/api/gis/distribuidora?lat=-33.4")
         assert resp.status_code == 422
+
+
+# ── GET /tips ─────────────────────────────────────────────────────────────────
+
+class TestTips:
+    def test_get_200(self, client):
+        resp = client.get("/tips")
+        assert resp.status_code == 200
+
+    def test_contiene_titulo(self, client):
+        resp = client.get("/tips")
+        assert "tip" in resp.text.lower()
+
+    def test_api_tips_json(self, client):
+        resp = client.get("/api/tips?page=1")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "tips" in data
+        assert isinstance(data["tips"], list)
+
+    def test_post_tip_crea_registro(self, client):
+        resp = client.post("/api/tips", json={
+            "texto": "Apagar luces al salir ahorra hasta 10% de energía mensual.",
+            "categoria": "iluminacion",
+        })
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data.get("ok") is True or "id" in data
+
+    def test_post_tip_texto_corto_rechazado(self, client):
+        resp = client.post("/api/tips", json={"texto": "Corto", "categoria": "habitos"})
+        assert resp.status_code in (400, 422)
+
+    def test_rss_feed(self, client):
+        resp = client.get("/tips/rss")
+        assert resp.status_code == 200
+        assert "xml" in resp.headers.get("content-type", "").lower() or "<rss" in resp.text
+
+
+# ── GET /desafio ──────────────────────────────────────────────────────────────
+
+class TestDesafio:
+    def test_get_200(self, client):
+        resp = client.get("/desafio")
+        assert resp.status_code == 200
+
+    def test_contiene_ranking(self, client):
+        resp = client.get("/desafio")
+        assert "kwh" in resp.text.lower() or "consumo" in resp.text.lower()
+
+    def test_post_desafio_registra(self, client):
+        resp = client.post("/api/desafio", json={
+            "kwh_anterior": 250,
+            "kwh_actual": 200,
+            "nickname": "TestUser",
+            "comuna": "Santiago",
+        })
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data.get("ok") is True or "reduccion_pct" in data
+
+    def test_post_desafio_kwh_cero_rechazado(self, client):
+        resp = client.post("/api/desafio", json={
+            "kwh_anterior": 0,
+            "kwh_actual": 0,
+        })
+        assert resp.status_code in (400, 422)
+
+
+# ── Newsletter ────────────────────────────────────────────────────────────────
+
+class TestNewsletter:
+    def test_subscribe_email_valido(self, client):
+        resp = client.post("/api/newsletter", json={
+            "email": "test_integracion@ejemplo.cl",
+            "fuente": "test",
+        })
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data.get("success") is True
+
+    def test_subscribe_email_invalido(self, client):
+        resp = client.post("/api/newsletter", json={"email": "no-es-email"})
+        assert resp.status_code in (400, 422)
+
+    def test_baja_token_invalido(self, client):
+        resp = client.get("/newsletter/baja?token=token-inexistente-xyz")
+        assert resp.status_code in (200, 404)
+        assert any(w in resp.text.lower() for w in ("no encontr", "enlace", "baja", "suscripci"))
+
+
+# ── Páginas estáticas ─────────────────────────────────────────────────────────
+
+class TestPaginasEstaticas:
+    def test_privacidad_200(self, client):
+        resp = client.get("/privacidad")
+        assert resp.status_code == 200
+        assert "privacidad" in resp.text.lower()
+
+    def test_offline_200(self, client):
+        resp = client.get("/offline")
+        assert resp.status_code == 200
+
+    def test_404_custom(self, client):
+        resp = client.get("/ruta-que-no-existe-xyz")
+        assert resp.status_code == 404
+        assert "404" in resp.text or "encontr" in resp.text.lower()
+
+    def test_robots_txt(self, client):
+        resp = client.get("/robots.txt")
+        assert resp.status_code == 200
+        assert "User-agent" in resp.text
+
+    def test_sitemap_xml(self, client):
+        resp = client.get("/sitemap.xml")
+        assert resp.status_code == 200
+        assert "<urlset" in resp.text or "<url>" in resp.text
+
+    def test_manifest_json(self, client):
+        resp = client.get("/manifest.json")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "name" in data
+        assert "icons" in data
+
+
+# ── Web Push ──────────────────────────────────────────────────────────────────
+
+class TestPush:
+    def test_vapid_public_key(self, client):
+        resp = client.get("/api/push/vapid-public-key")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "publicKey" in data
+        assert len(data["publicKey"]) > 20

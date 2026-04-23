@@ -97,7 +97,7 @@
           {
             "desde_kwh": 350,
             "hasta_kwh": 500,
-            "recargo_kwh": 1.409
+            "recargo_kwh": 1.408
           },
           {
             "desde_kwh": 500,
@@ -112,7 +112,7 @@
           {
             "desde_kwh": 5000,
             "hasta_kwh": 99999,
-            "recargo_kwh": 3.281
+            "recargo_kwh": 3.282
           }
         ]
       },
