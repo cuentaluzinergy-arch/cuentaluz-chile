@@ -3,11 +3,11 @@
   "_metodologia": "Precio final = cargo_fijo_con_iva + servicio_publico*kwh + (transporte+energia+potencia)*kwh*1.19 + FET_recargo*kwh_en_tramo*1.19",
   "_nota_IVA": "El 'cargo por servicio público' (FET base) está exento de IVA. El resto aplica IVA 19%.",
   "metadata": {
-    "ultima_actualizacion": "2026-04-01",
+    "ultima_actualizacion": "2026-04-23",
     "vigente_desde": "2026-04-01",
     "vigente_hasta": "2026-09-30",
     "semestre": "1S2026",
-    "fuente": "CNE / Distribuidoras",
+    "fuente": "CNE / Distribuidoras. Enel ✅ abr-2026. Frontel ✅ abr-2026. Chilquinta ✅ abr-2026 (verif. PDF mar-2026). CGE ⚠️ mar-2025 pendiente actualización.",
     "proxima_actualizacion": "2026-10-01"
   },
   "enel": {
@@ -133,10 +133,10 @@
     "nombre": "Chilquinta",
     "nombre_completo": "Chilquinta Distribución S.A.",
     "region": "V Región de Valparaíso",
-    "fuente": "Tarifas de Suministro Chilquinta Distribución S.A. – PRECIO TRASPASABLE, marzo 2026 (D.S. 5T/2024, 3T/2025, 15T/2025). PDF publicado en legales.cooperativa.cl (mar-2026). Valores tarifa BT1A/TRBT2 zona urbana. cargo_transporte = STxE (31.827 c/IVA). cargo_energia = precio nudo BT1A/BT2 (154.240 c/IVA). cargo_potencia = compras (35.555) + potencia base Tramo 1 (40.624) ambos c/IVA / 1.19. BT2 demanda = compras (13.910,50) + punta distribución T1 (4.725,00) ambos c/IVA / 1.19.",
+    "fuente": "Tarifas de Suministro Chilquinta Distribución S.A. – PRECIO TRASPASABLE (D.S. 5T/2024, 3T/2025, 24T/2025 + REX 722/2025, REX 780/2025, REX 137/2026). PDF publicado mar-2026, vigente desde 01-04-2026. Valores verificados: cargo_fijo c/IVA=1.214,12 $/mes (extraído PDF). cargo_transporte = STxE (31.827 c/IVA). cargo_energia = precio nudo BT1A/BT2 (154.240 c/IVA). cargo_potencia = compras (35.555) + potencia base Tramo 1 (40.624) ambos c/IVA / 1.19. BT2 demanda = compras (13.910,50) + punta distribución T1 (4.725,00) ambos c/IVA / 1.19.",
     "url_fuente": "https://legales.cooperativa.cl/wp-content/uploads/2026/03/VERSIÓN-IMPRESA-TARIFAS-DE-SUMINISTRO-CHILQUINTA.pdf",
-    "vigente_desde": "2026-03-01",
-    "ultima_actualizacion": "2026-03-01",
+    "vigente_desde": "2026-04-01",
+    "ultima_actualizacion": "2026-04-01",
     "datos_verificados": true,
     "tarifas": {
       "BT1": {
