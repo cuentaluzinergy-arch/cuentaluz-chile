@@ -93,13 +93,27 @@ async def calcular(request: Request):
         kwh = round(kwh, 1)
 
     if kwh <= 0:
+        try:
+            tarifa_meta = _get_tarifa_meta()
+        except Exception:
+            tarifa_meta = None
+        conteo_calculos = 0
+        db = SessionLocal()
+        try:
+            conteo_calculos = db.query(func.count(Benchmark.id)).scalar() or 0
+        except Exception:
+            pass
+        finally:
+            db.close()
         return templates.TemplateResponse(
             request, "index.html",
             {
-                "tarifas":  cargar_tarifas(),
-                "aparatos": cargar_aparatos(),
-                "comunas":  cargar_comunas(),
-                "error":    "Ingresa un consumo mayor a 0 kWh o selecciona al menos un aparato.",
+                "tarifas":        cargar_tarifas(),
+                "aparatos":       cargar_aparatos(),
+                "comunas":        cargar_comunas(),
+                "tarifa_meta":    tarifa_meta,
+                "conteo_calculos": conteo_calculos,
+                "error":          "Ingresa un consumo mayor a 0 kWh o selecciona al menos un aparato.",
             },
         )
 
