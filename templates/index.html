@@ -576,38 +576,105 @@
     }
 
     function parsearNumCL(s) {
-      // "1.250" o "1,250" → 1250 (separador de miles chileno)
-      return parseInt(s.replace(/[.,]/g, ''), 10);
+      // kWh en boletas chilenas siempre es entero.
+      // "1.250" → separador miles → 1250
+      // "325,0" o "325.0" → decimal → 325
+      // "125.5" → decimal (no miles) → 125
+      s = s.trim();
+      s = s.replace(/,\d{1,2}$/, '');   // quitar decimal con coma: "325,5" → "325"
+      s = s.replace(/\.\d{1}$/, '');    // quitar decimal con punto de 1 dígito: "325.5" → "325"
+      s = s.replace(/[.,]/g, '');       // quitar separadores de miles restantes
+      return parseInt(s, 10) || 0;
+    }
+
+    // Preprocesado de imagen: escala de grises + contraste (mejora OCR en boletas)
+    function preprocesarImagen(file) {
+      return new Promise(resolve => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+          const c = document.createElement('canvas');
+          c.width = img.naturalWidth;
+          c.height = img.naturalHeight;
+          const ctx = c.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          const d = ctx.getImageData(0, 0, c.width, c.height);
+          for (let i = 0; i < d.data.length; i += 4) {
+            // escala de grises
+            const g = 0.299 * d.data[i] + 0.587 * d.data[i+1] + 0.114 * d.data[i+2];
+            // contraste simple: llevar hacia blanco/negro
+            const v = g > 128 ? Math.min(255, g * 1.3) : Math.max(0, g * 0.7);
+            d.data[i] = d.data[i+1] = d.data[i+2] = v;
+          }
+          ctx.putImageData(d, 0, 0);
+          URL.revokeObjectURL(url);
+          c.toBlob(resolve, 'image/png');
+        };
+        img.onerror = () => resolve(file); // fallback: imagen original
+        img.src = url;
+      });
     }
 
     function extraerKwh(texto) {
-      const t = texto.replace(/[\r\n]+/g, ' ');
+      const t = texto.replace(/[\r\n\t]+/g, ' ').replace(/\s{2,}/g, ' ');
       const candidatos = [];
-
-      // P1: número inmediatamente antes de "kWh" – mayor peso
-      const r1 = /(\d{1,2}[.,]\d{3}|\d{2,4})\s*(?:kwh|kw\.?h)/gi;
       let m;
+
+      // P1 (w=2): número inmediatamente antes o después de "kWh"
+      const r1 = /(\d{1,2}[.,]\d{3}|\d{2,4})\s*(?:kwh|kw\.?h)/gi;
       while ((m = r1.exec(t)) !== null) {
         const n = parsearNumCL(m[1]);
         if (n >= 10 && n <= 5000) candidatos.push({ v: n, w: 2 });
       }
+      const r1b = /(?:kwh|kw\.?h)\s*[:\-]?\s*(\d{1,2}[.,]\d{3}|\d{2,4})/gi;
+      while ((m = r1b.exec(t)) !== null) {
+        const n = parsearNumCL(m[1]);
+        if (n >= 10 && n <= 5000) candidatos.push({ v: n, w: 2 });
+      }
 
-      // P2: "Energía Activa" seguido de número – mayor confianza
-      const r2 = /energ[íi]a\s+activa[^0-9\n]{0,30}(\d[\d.,]{0,6})/gi;
+      // P2 (w=5): "Energía Activa" + número — patrón más confiable (Enel, Chilquinta)
+      const r2 = /energ[íi]a\s+activa[^0-9]{0,30}?(\d[\d.,]{0,6})/gi;
       while ((m = r2.exec(t)) !== null) {
+        const n = parsearNumCL(m[1]);
+        if (n >= 10 && n <= 5000) candidatos.push({ v: n, w: 5 });
+      }
+
+      // P3 (w=4): "Total Energía Activa" / "Total kWh" + número
+      const r3 = /total\s+(?:energ[íi]a\s+activa|kwh)[^0-9]{0,20}?(\d[\d.,]{0,6})/gi;
+      while ((m = r3.exec(t)) !== null) {
         const n = parsearNumCL(m[1]);
         if (n >= 10 && n <= 5000) candidatos.push({ v: n, w: 4 });
       }
 
-      // P3: "Consumo" + número + kWh
-      const r3 = /consumo[^0-9\n]{0,20}(\d[\d.,]{0,6})\s*(?:kwh|kw)/gi;
-      while ((m = r3.exec(t)) !== null) {
+      // P4 (w=3): "Consumo" + número + kWh (CGE, Frontel)
+      const r4 = /consumo[^0-9]{0,25}?(\d[\d.,]{0,6})\s*(?:kwh|kw)?/gi;
+      while ((m = r4.exec(t)) !== null) {
         const n = parsearNumCL(m[1]);
         if (n >= 10 && n <= 5000) candidatos.push({ v: n, w: 3 });
       }
 
+      // P5 (w=3): "Consumo Facturado" / "kWh Activa" / "kWh consumidos" (Chilquinta, CGE)
+      const r5 = /(?:consumo\s+facturado|kwh\s+activ|kwh\s+consum)[^0-9]{0,20}?(\d[\d.,]{0,6})/gi;
+      while ((m = r5.exec(t)) !== null) {
+        const n = parsearNumCL(m[1]);
+        if (n >= 10 && n <= 5000) candidatos.push({ v: n, w: 3 });
+      }
+
+      // P6 (w=2): "Energía Base" o "Energía Total" + número (Enel)
+      const r6 = /energ[íi]a\s+(?:base|total)[^0-9]{0,20}?(\d[\d.,]{0,6})/gi;
+      while ((m = r6.exec(t)) !== null) {
+        const n = parsearNumCL(m[1]);
+        if (n >= 10 && n <= 5000) candidatos.push({ v: n, w: 2 });
+      }
+
       if (!candidatos.length) return null;
-      candidatos.sort((a, b) => b.w - a.w);
+      // Ordenar por peso desc, luego preferir rango residencial típico (50-800 kWh)
+      candidatos.sort((a, b) => {
+        if (b.w !== a.w) return b.w - a.w;
+        const aTyp = a.v >= 50 && a.v <= 800 ? 1 : 0;
+        const bTyp = b.v >= 50 && b.v <= 800 ? 1 : 0;
+        return bTyp - aTyp;
+      });
       return candidatos[0].v;
     }
 
@@ -636,8 +703,12 @@
       try {
         setProgress(5, 'Cargando motor OCR…');
         await loadTesseract();
-        setProgress(15, 'Preparando imagen…');
+        setProgress(12, 'Mejorando imagen…');
 
+        // Preprocesar antes de pasar a Tesseract
+        const imgProcesada = await preprocesarImagen(file);
+
+        setProgress(18, 'Iniciando reconocimiento…');
         const worker = await Tesseract.createWorker('spa', 1, {
           logger: msg => {
             if (msg.status === 'recognizing text') {
@@ -646,8 +717,11 @@
           }
         });
 
+        // PSM 6: bloque uniforme de texto (mejor para documentos tipo factura)
+        await worker.setParameters({ tessedit_pageseg_mode: '6' });
+
         setProgress(92, 'Extrayendo datos…');
-        const { data: { text } } = await worker.recognize(file);
+        const { data: { text } } = await worker.recognize(imgProcesada);
         await worker.terminate();
         setProgress(100, 'Listo');
 
