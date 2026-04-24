@@ -207,32 +207,63 @@ def calcular_escenarios(
 # Paneles solares
 # ──────────────────────────────────────────────────
 
-def calcular_solar(resultado: dict) -> dict:
+# Horas de Sol Pico (HSP) promedio anual por distribuidora / región
+_HSP = {
+    "enel":       5.5,   # Santiago RM
+    "chilquinta": 5.0,   # V Región Valparaíso
+    "cge":        4.5,   # Concepción / Centro-sur
+    "frontel":    4.0,   # IX Región Araucanía
+}
+_M2_POR_PANEL  = 2.0   # m² efectivos por panel 400Wp (incluye separación)
+_EF_SISTEMA    = 0.80  # eficiencia sistema (pérdidas inversor + cableado)
+_CLP_POR_KWP   = 1_000_000  # costo instalado referencia (CLP/kWp, mercado Chile 2025)
+
+
+def calcular_solar(resultado: dict, m2_disponibles: float = None) -> dict:
     """
-    Estimación simplificada de retorno de inversión solar fotovoltaico.
-    Sistema 3 kWp, costo $2.5M–$4M CLP, generación ~350 kWh/mes (promedio nacional).
+    Estimación de retorno de inversión solar fotovoltaico.
+    Si se proporcionan m2_disponibles, el sistema se dimensiona según el techo.
+    Si no, se dimensiona para cubrir ~80% del consumo (máx 6 kWp).
     """
-    kwh        = resultado["kwh"]
-    costo_min  = 2_500_000
-    costo_max  = 4_000_000
-    costo_mid  = 3_250_000
-    produccion = 350
+    kwh          = resultado["kwh"]
+    distribuidora = resultado.get("distribuidora", "enel")
+    hsp          = _HSP.get(distribuidora, 4.5)
 
     precio_efect = (
         (resultado["cargo_energia"] + resultado["cargo_potencia"] + resultado["cargo_transporte"])
-        / kwh
-        if kwh > 0 else 0
+        / kwh if kwh > 0 else 0
     )
 
+    # Dimensionar sistema
+    if m2_disponibles and m2_disponibles >= _M2_POR_PANEL:
+        n_paneles = int(m2_disponibles / _M2_POR_PANEL)
+        kwp       = round(n_paneles * 0.4, 2)
+    else:
+        # Tamaño para cubrir 80% del consumo, entre 1.6 y 6 kWp
+        kwh_objetivo  = kwh * 0.80
+        kwp_necesario = kwh_objetivo / (hsp * 30 * _EF_SISTEMA) if hsp > 0 else 3.0
+        kwp           = round(max(1.6, min(kwp_necesario, 6.0)), 2)
+        n_paneles     = round(kwp / 0.4)
+
+    produccion   = round(kwp * hsp * 30 * _EF_SISTEMA)
     kwh_aprovec  = min(kwh, produccion)
     ahorro_mes   = round(kwh_aprovec * precio_efect)
     ahorro_anual = ahorro_mes * 12
-    payback      = round(costo_mid / ahorro_anual, 1) if ahorro_anual > 0 else None
-    cobertura    = round(min(kwh_aprovec / kwh * 100, 100), 1) if kwh > 0 else 0
+
+    costo_ref = round(kwp * _CLP_POR_KWP / 100_000) * 100_000
+    costo_min = round(kwp * 900_000    / 100_000) * 100_000
+    costo_max = round(kwp * 1_200_000  / 100_000) * 100_000
+
+    payback   = round(costo_ref / ahorro_anual, 1) if ahorro_anual > 0 else None
+    cobertura = round(min(kwh_aprovec / kwh * 100, 100), 1) if kwh > 0 else 0
 
     return {
+        "n_paneles":          n_paneles,
+        "kwp_sistema":        kwp,
+        "hsp":                hsp,
         "costo_min":          costo_min,
         "costo_max":          costo_max,
+        "costo_referencia":   costo_ref,
         "produccion_mensual": produccion,
         "kwh_aprovechable":   kwh_aprovec,
         "ahorro_mensual":     ahorro_mes,
@@ -240,6 +271,9 @@ def calcular_solar(resultado: dict) -> dict:
         "payback_anos":       payback,
         "cobertura_pct":      cobertura,
         "conviene":           payback is not None and payback <= 8,
+        "precio_kwh_efect":   round(precio_efect, 2),
+        "m2_por_panel":       _M2_POR_PANEL,
+        "eficiencia":         _EF_SISTEMA,
     }
 
 

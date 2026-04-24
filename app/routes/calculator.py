@@ -1,4 +1,5 @@
 import json
+import os
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -119,7 +120,7 @@ async def calcular(request: Request):
 
     resultado = calcular_boleta(kwh, distribuidora, tarifa_tipo)
     escenarios = calcular_escenarios(resultado, distribuidora, tarifa_tipo)
-    solar = calcular_solar(resultado)
+    solar = calcular_solar(resultado)  # distribuidora ya está en resultado
     comparacion_tarifas = calcular_comparacion_tarifas(kwh, distribuidora)
     comparacion_distribuidoras = calcular_comparacion_distribuidoras(kwh, tarifa_tipo)
     recomendaciones = generar_recomendaciones(resultado, distribuidora)
@@ -136,6 +137,8 @@ async def calcular(request: Request):
         finally:
             db.close()
 
+    solar_whatsapp = os.getenv("SOLAR_WHATSAPP", "")
+
     return templates.TemplateResponse(
         request, "resultados.html",
         {
@@ -147,6 +150,7 @@ async def calcular(request: Request):
             "recomendaciones":           recomendaciones,
             "comuna":                    nombre_comuna or None,
             "benchmark":                 benchmark,
+            "solar_whatsapp":            solar_whatsapp,
         },
     )
 

@@ -283,68 +283,100 @@
 <!-- ===== PANELES SOLARES ===== -->
 <section class="mb-8">
   <h2 class="text-xl font-bold text-gray-800 mb-4">☀️ ¿Te convienen los paneles solares?</h2>
-  <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl border border-amber-200 p-6 shadow-sm">
+  <div id="solar-calc"
+       class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl border border-amber-200 p-6 shadow-sm"
+       data-kwh="{{ solar.kwh }}"
+       data-precio="{{ solar.precio_kwh_efect }}"
+       data-hsp="{{ solar.hsp }}"
+       data-m2-panel="{{ solar.m2_por_panel }}"
+       data-ef="{{ solar.eficiencia }}">
+
+    <!-- Slider m² de techo -->
+    <div class="mb-6">
+      <label for="slider-m2" class="block text-sm font-semibold text-amber-800 mb-2">
+        ¿Cuántos m² de techo disponible tienes?
+        <span class="text-amber-600 font-bold" id="val-m2">{{ (solar.n_paneles * solar.m2_por_panel) | int }} m²</span>
+      </label>
+      <input type="range" id="slider-m2"
+             min="4" max="80" step="2"
+             value="{{ [solar.n_paneles * solar.m2_por_panel, 4] | max | int }}"
+             class="w-full h-2 bg-amber-200 rounded-lg appearance-none cursor-pointer accent-amber-500">
+      <div class="flex justify-between text-xs text-amber-600 mt-1">
+        <span>4 m² (1 panel)</span>
+        <span>80 m² (20 paneles)</span>
+      </div>
+    </div>
+
+    <!-- Métricas dinámicas -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
       <div class="text-center sm:text-left">
         <p class="text-xs text-amber-700 font-semibold uppercase tracking-wide mb-1">Cobertura estimada</p>
-        <div class="text-4xl font-extrabold text-amber-600">{{ solar.cobertura_pct }}%</div>
+        <div class="text-4xl font-extrabold text-amber-600"><span id="solar-cobertura">{{ solar.cobertura_pct }}</span>%</div>
         <p class="text-sm text-amber-700 mt-1">de tu consumo</p>
       </div>
       <div class="text-center">
         <p class="text-xs text-amber-700 font-semibold uppercase tracking-wide mb-1">Ahorro mensual</p>
-        <div class="text-4xl font-extrabold text-amber-600">{{ clp(solar.ahorro_mensual) }}</div>
+        <div class="text-4xl font-extrabold text-amber-600" id="solar-ahorro">{{ clp(solar.ahorro_mensual) }}</div>
         <p class="text-sm text-amber-700 mt-1">CLP / mes</p>
       </div>
       <div class="text-center sm:text-right">
         <p class="text-xs text-amber-700 font-semibold uppercase tracking-wide mb-1">Retorno de inversión</p>
-        {% if solar.payback_anos %}
-        <div class="text-4xl font-extrabold {% if solar.conviene %}text-green-600{% else %}text-amber-600{% endif %}">
-          {{ solar.payback_anos }} años
+        <div class="text-4xl font-extrabold {% if solar.conviene %}text-green-600{% else %}text-amber-600{% endif %}" id="solar-payback">
+          {% if solar.payback_anos %}{{ solar.payback_anos }} años{% else %}N/D{% endif %}
         </div>
-        {% else %}
-        <div class="text-2xl font-bold text-gray-400">N/D</div>
-        {% endif %}
         <p class="text-sm text-amber-700 mt-1">payback estimado</p>
       </div>
     </div>
 
-    <div class="mt-5 pt-5 border-t border-amber-200 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-amber-800">
+    <!-- Detalles técnicos -->
+    <div class="mt-5 pt-5 border-t border-amber-200 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-amber-800">
       <div>
-        <span class="font-semibold">Sistema típico (3 kW):</span>
-        {{ clp(solar.costo_min) }} – {{ clp(solar.costo_max) }} CLP instalado
+        <span class="font-semibold">Sistema:</span>
+        <span id="solar-paneles">{{ solar.n_paneles }}</span> paneles ·
+        <span id="solar-kwp">{{ solar.kwp_sistema }}</span> kWp
       </div>
       <div>
-        <span class="font-semibold">Generación estimada:</span>
-        ~{{ solar.produccion_mensual }} kWh/mes (promedio nacional)
+        <span class="font-semibold">Generación:</span>
+        ~<span id="solar-gen">{{ solar.produccion_mensual }}</span> kWh/mes
+      </div>
+      <div>
+        <span class="font-semibold">Inversión ref.:</span>
+        <span id="solar-costo">{{ clp(solar.costo_min) }} – {{ clp(solar.costo_max) }}</span>
       </div>
     </div>
 
-    {% if solar.conviene %}
-    <div class="mt-4 bg-green-100 text-green-800 rounded-xl px-4 py-3 text-sm font-semibold">
-      ✅ Con tu nivel de consumo, los paneles solares son una buena inversión.
-      Además del ahorro, aumentas el valor de tu propiedad y reduces tu huella de carbono.
+    <!-- Badge conviene/no conviene -->
+    <div id="solar-badge" class="mt-4 {% if solar.conviene %}bg-green-100 text-green-800{% else %}bg-amber-100 text-amber-800{% endif %} rounded-xl px-4 py-3 text-sm font-semibold">
+      {% if solar.conviene %}
+        ✅ Con {{ solar.n_paneles }} paneles ({{ solar.kwp_sistema }} kWp) cubres el {{ solar.cobertura_pct }}% de tu consumo. ¡Buena inversión!
+      {% else %}
+        ℹ️ Retorno estimado: {{ solar.payback_anos or 'N/D' }} años. Puede ser válido a largo plazo o si buscas independencia energética.
+      {% endif %}
     </div>
-    {% else %}
-    <div class="mt-4 bg-amber-100 text-amber-800 rounded-xl px-4 py-3 text-sm">
-      ℹ️ El retorno de inversión supera los 8 años. Puede ser válido a largo plazo o si buscas independencia energética,
-      pero analiza bien tu caso antes de decidir.
-    </div>
-    {% endif %}
 
-    <!-- CTA Afiliados solares -->
+    <!-- CTA + Info -->
     <div class="mt-5 pt-4 border-t border-amber-200 flex flex-col sm:flex-row gap-3">
       <button id="btn-solar-whatsapp"
+              data-phone="{{ solar_whatsapp }}"
               class="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 active:bg-green-700 text-white font-bold py-3 px-5 rounded-xl transition-colors shadow-md text-sm">
         <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
           <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
         </svg>
-        Solicitar cotización gratis
+        Cotización gratis por WhatsApp
       </button>
-      <a href="https://www.google.com/search?q=instaladores+paneles+solares+Chile"
-         target="_blank" rel="noopener"
-         class="flex-1 flex items-center justify-center gap-2 border border-amber-300 text-amber-800 hover:bg-amber-100 font-semibold py-3 px-5 rounded-xl transition-colors text-sm">
-        🔍 Comparar empresas solares
-      </a>
+      <button type="button" id="btn-solar-info"
+              class="flex-1 flex items-center justify-center gap-2 border border-amber-300 text-amber-800 hover:bg-amber-100 font-semibold py-3 px-5 rounded-xl transition-colors text-sm">
+        💡 ¿Cómo funciona el cálculo?
+      </button>
+    </div>
+
+    <!-- Info collapse -->
+    <div id="solar-info" class="hidden mt-4 bg-white border border-amber-200 rounded-xl p-4 text-sm text-gray-700 space-y-2">
+      <p><strong>Horas de Sol Pico (HSP) de tu zona:</strong> {{ solar.hsp }} h/día — determina cuánto genera cada panel según la radiación solar promedio de tu región.</p>
+      <p><strong>Tamaño del panel:</strong> {{ solar.m2_por_panel }} m² por panel de 400 Wp (0,4 kWp).</p>
+      <p><strong>Eficiencia del sistema:</strong> {{ (solar.eficiencia * 100) | int }}% (pérdidas por inversor, cableado y temperatura).</p>
+      <p><strong>Precio efectivo de tu kWh:</strong> ${{ solar.precio_kwh_efect }} — incluye energía, transporte y potencia (sin cargo fijo ni IVA del servicio público).</p>
+      <p class="text-xs text-gray-400">Estimación orientativa. El ahorro real depende de tu perfil de consumo y condiciones de instalación.</p>
     </div>
   </div>
 </section>
@@ -652,13 +684,118 @@
     }
   }
 
-  // ── Solar CTA WhatsApp ────────────────────────────────────
-  document.getElementById('btn-solar-whatsapp')?.addEventListener('click', function () {
-    const kwh  = {{ resultado.kwh }};
-    const dist = {{ resultado.distribuidora | tojson }};
-    const msg  = `Hola! Me interesa cotizar paneles solares para mi hogar. Mi consumo es de ${kwh} kWh/mes (${dist}). ¿Pueden ayudarme?`;
-    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
-  });
+  // ── Estimador solar interactivo ───────────────────────────
+  (function () {
+    const solarEl = document.getElementById('solar-calc');
+    if (!solarEl) return;
+
+    const KWH       = parseFloat(solarEl.dataset.kwh);
+    const PRECIO    = parseFloat(solarEl.dataset.precio);
+    const HSP       = parseFloat(solarEl.dataset.hsp);
+    const M2_PANEL  = parseFloat(solarEl.dataset.m2Panel);
+    const EF        = parseFloat(solarEl.dataset.ef);
+    const slider    = document.getElementById('slider-m2');
+    const valM2El   = document.getElementById('val-m2');
+
+    function clpFmt(n) {
+      return '$' + Math.round(n).toLocaleString('es-CL');
+    }
+
+    function calcSolar(m2) {
+      const nPaneles  = Math.max(1, Math.floor(m2 / M2_PANEL));
+      const kwp       = Math.round(nPaneles * 0.4 * 100) / 100;
+      const prod      = Math.round(kwp * HSP * 30 * EF);
+      const kwhApr    = Math.min(KWH, prod);
+      const ahorroMes = Math.round(kwhApr * PRECIO);
+      const ahorroAnu = ahorroMes * 12;
+      const costoRef  = Math.round(kwp * 1000000 / 100000) * 100000;
+      const costoMin  = Math.round(kwp *  900000 / 100000) * 100000;
+      const costoMax  = Math.round(kwp * 1200000 / 100000) * 100000;
+      const payback   = ahorroAnu > 0 ? Math.round(costoRef / ahorroAnu * 10) / 10 : null;
+      const cobertura = KWH > 0 ? Math.round(Math.min(kwhApr / KWH * 100, 100) * 10) / 10 : 0;
+      return { nPaneles, kwp, prod, kwhApr, ahorroMes, ahorroAnu, costoMin, costoMax, costoRef, payback, cobertura };
+    }
+
+    function renderSolar(m2) {
+      const r = calcSolar(m2);
+      valM2El.textContent = m2 + ' m²';
+      document.getElementById('solar-cobertura').textContent = r.cobertura;
+      document.getElementById('solar-ahorro').textContent    = clpFmt(r.ahorroMes);
+      document.getElementById('solar-paneles').textContent   = r.nPaneles;
+      document.getElementById('solar-kwp').textContent       = r.kwp;
+      document.getElementById('solar-gen').textContent       = r.prod;
+      document.getElementById('solar-costo').textContent     = clpFmt(r.costoMin) + ' – ' + clpFmt(r.costoMax);
+
+      const pbEl = document.getElementById('solar-payback');
+      pbEl.textContent = r.payback ? r.payback + ' años' : 'N/D';
+
+      const badge   = document.getElementById('solar-badge');
+      const conviene = r.payback !== null && r.payback <= 8;
+      if (conviene) {
+        badge.className = 'mt-4 bg-green-100 text-green-800 rounded-xl px-4 py-3 text-sm font-semibold';
+        badge.textContent = '✅ Con ' + r.nPaneles + ' paneles (' + r.kwp + ' kWp) cubres el ' + r.cobertura + '% de tu consumo. ¡Buena inversión!';
+        pbEl.className = 'text-4xl font-extrabold text-green-600';
+      } else {
+        badge.className = 'mt-4 bg-amber-100 text-amber-800 rounded-xl px-4 py-3 text-sm font-semibold';
+        badge.textContent = 'ℹ️ Retorno estimado: ' + (r.payback || 'N/D') + ' años. Puede ser válido a largo plazo.';
+        pbEl.className = 'text-4xl font-extrabold text-amber-600';
+      }
+
+      // Guardar valores en el botón para usarlos al click
+      const btn = document.getElementById('btn-solar-whatsapp');
+      if (btn) {
+        btn.dataset.m2       = m2;
+        btn.dataset.nPaneles = r.nPaneles;
+        btn.dataset.kwp      = r.kwp;
+        btn.dataset.gen      = r.prod;
+        btn.dataset.ahorro   = r.ahorroMes;
+        btn.dataset.payback  = r.payback || 'N/D';
+        btn.dataset.cobertura= r.cobertura;
+        btn.dataset.costoMin = r.costoMin;
+        btn.dataset.costoMax = r.costoMax;
+      }
+    }
+
+    slider.addEventListener('input', function () { renderSolar(parseInt(this.value)); });
+    renderSolar(parseInt(slider.value));
+
+    // Toggle info panel
+    document.getElementById('btn-solar-info')?.addEventListener('click', function () {
+      const info = document.getElementById('solar-info');
+      if (info) info.classList.toggle('hidden');
+    });
+
+    // WhatsApp cotización con datos del estimador
+    document.getElementById('btn-solar-whatsapp')?.addEventListener('click', function () {
+      const phone  = this.dataset.phone || '';
+      const kwh    = {{ resultado.kwh }};
+      const dist   = {{ resultado.distribuidora | tojson }};
+      const m2     = this.dataset.m2      || '—';
+      const paneles= this.dataset.nPaneles|| '—';
+      const kwp    = this.dataset.kwp     || '—';
+      const gen    = this.dataset.gen     || '—';
+      const ahorro = this.dataset.ahorro  || '—';
+      const payback= this.dataset.payback || '—';
+      const cob    = this.dataset.cobertura|| '—';
+      const cMin   = this.dataset.costoMin|| '—';
+      const cMax   = this.dataset.costoMax|| '—';
+
+      const msg = `Hola! Quiero cotizar paneles solares 🌞\n\n` +
+        `📊 *Mi consumo:* ${kwh} kWh/mes (${dist})\n` +
+        `📐 *Techo disponible:* ${m2} m²\n` +
+        `⚡ *Sistema estimado:* ${paneles} paneles · ${kwp} kWp\n` +
+        `☀️ *Generación mensual:* ~${gen} kWh\n` +
+        `💰 *Ahorro estimado:* $${parseInt(ahorro).toLocaleString('es-CL')}/mes · ${cob}% de cobertura\n` +
+        `📅 *Payback:* ${payback} años\n` +
+        `💵 *Inversión ref.:* $${parseInt(cMin).toLocaleString('es-CL')} – $${parseInt(cMax).toLocaleString('es-CL')}\n\n` +
+        `¿Pueden contactarme para una visita?`;
+
+      const url = phone
+        ? `https://wa.me/${phone}?text=` + encodeURIComponent(msg)
+        : `https://wa.me/?text=`         + encodeURIComponent(msg);
+      window.open(url, '_blank');
+    });
+  })();
 
   // ── Compartir resultado ───────────────────────────────────
   document.getElementById('btn-compartir')?.addEventListener('click', function () {
